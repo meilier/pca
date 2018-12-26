@@ -1,5 +1,4 @@
 #include "common.hpp"
-#include <string>
 
 
 
@@ -20,8 +19,8 @@ class Cert{
         const string nodetlsCert = nodeCert + "tls";
         const string nodeAccountRequest = nodeRequest + "account";
         const string nodeTlsRequest = nodeRequest + "tls";
-        const string nodeAccountCrl = nodeCrl + "account";
-        const string nodeTlsCrl = nodeCrl + "tls";
+        //const string nodeAccountCrl = nodeCrl + "account";
+        //const string nodeTlsCrl = nodeCrl + "tls";
 
         //filename
         const string accountCert = "accountCert";
@@ -29,8 +28,8 @@ class Cert{
 
     public:
         void signCert(string certType);
-        void getAllCert();
+        void getAllCerts();
         void revokeCert();
 
-        string getCertFileName(string fileType, string useType);
+        string getCertFileName(string fileType, string useType = "");
 };
