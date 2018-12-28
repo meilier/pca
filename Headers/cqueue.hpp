@@ -8,7 +8,6 @@
  
  
     template<class Type>
-	/*消息队列实现*/
     class ConcurrentQueue {
         ConcurrentQueue& operator=(const ConcurrentQueue&) = delete;
  

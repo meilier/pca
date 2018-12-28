@@ -226,7 +226,9 @@ void handleProcess()
                 //sign account certificate
                 mCert->signCert("account");
                 sq.Push(SAO);
-            }else if(hqmessage == GTCO){
+            }
+            else if (hqmessage == GTCO)
+            {
                 //sign tls certificate
                 mCert->signCert("tls");
                 sq.Push(STO);
@@ -381,7 +383,7 @@ void sendProcess()
 
 int main()
 {
-    mCert = new Cert();
+    mCert = &mCert->getInstance();
     //new message socket
     messageSock = socket(AF_INET, SOCK_STREAM, 0);
     memset(&servaddr, 0, sizeof(servaddr));
