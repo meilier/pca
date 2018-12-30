@@ -17,30 +17,12 @@
 #include <Kernel/netinet/tcp.h>
 #include "cert.hpp"
 #include "cqueue.hpp"
+#include "cmessage.hpp"
 
 #define PORT 7000
 #define FILEPORT 7001
 #define IP "127.0.0.1"
 #define MAXLINE 4096
-
-// control message
-//rq
-map<string, string> cm;
-string SA = "sign-account";
-string ST = "sign-tls";
-string GC = "get-certs";
-string IC = "invoke-cert";
-string RGP = "ready-get-pem";
-
-//sq
-string SAR = "sign-account-ready";
-string SAO = "sign-account-ok";
-string STR = "sign-tls-ready";
-string STO = "sigin-tls-ok";
-
-//hq
-string GACO = "get-account-csr-ok";
-string GTCO = "get-tls-csr-ok";
 
 // for easy mode ,we ues single process
 int sema = 1;
@@ -203,14 +185,14 @@ void handleProcess()
                 //send certs.tar.gz to client
                 std::thread t4(fileProcess, 0, 2);
                 t4.detach();
-                sq.Push("GC");
+                sq.Push("GCR");
             }
             else if (rpmessage == IC)
             {
                 //send invoke.crl to client
                 std::thread t4(fileProcess, 0, 3);
                 t4.detach();
-                sq.Push("GC");
+                sq.Push("GCR");
             }
             else
             {
@@ -338,6 +320,10 @@ void sendProcess()
 {
     while (1)
     {
+        if (!sq.Empty())
+        {
+            continue;
+        }
         // char buf[1024];
         // fgets(buf, sizeof(buf), stdin);
         // //printf("you are send %s", buf);
@@ -424,14 +410,14 @@ int main()
     std::thread t(getConn);
     t.detach();
     //printf("done\n");
-    //thread : input ==>> send
+    //thread : send
     std::thread t1(sendProcess);
     t1.detach();
-    //thread : recv ==>> show
+    //thread : recv
     std::thread t2(receiveProcess);
     t2.detach();
 
-    //thread : recv ==>> show
+    //thread : handle
     std::thread t3(handleProcess);
     t3.detach();
     while (1)
