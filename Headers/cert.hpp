@@ -57,7 +57,7 @@ Cert::Cert()
 }
 Cert::~Cert()
 {
-    printf("exitTime is %d\n",exitTime);
+    printf("exitTime is %d\n", exitTime);
     printf("Clear CA Server\n");
     //call setup.sh
     string signCmd = "sh " + string(WORKDIR) + "/Scripts/clear.sh";
