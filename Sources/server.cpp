@@ -55,6 +55,7 @@ void getConn()
             li.push_back(conn);
             printf("%d\n", conn);
             sema--;
+            mCert->increaseSerial();
         }
     }
 }

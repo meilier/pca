@@ -128,7 +128,6 @@ void handleProcess()
             //connect to server file transfer port, such as, 7001
             std::thread t4(fileProcess, 0, 1);
             t4.detach();
-            sq.Push("STR");
         }
         else if (rpmessage == SAO)
         {
@@ -154,8 +153,9 @@ void handleProcess()
 
 /*********
  * send crs file to server
+ * certType: 0 account crs, 1 tls csr.
  * */
-void fileProcess()
+void fileProcess(int certType)
 {
     int file_cli;
 

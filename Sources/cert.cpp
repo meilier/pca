@@ -49,29 +49,27 @@ void Cert::revokeCert()
  */
 string Cert::getCertFileName(string fileType, string useType)
 {
-    stringstream ss;
-    ss << aCertSerial;
-    string acs = ss.str();
     if (fileType == "csr")
     {
         if (useType == "account")
         {
-            return nodeAccountRequest + accountCert + ".csr";
+
+            return nodeAccountRequest + accountCert + to_string(CertSerial) + ".csr";
         }
         else
         {
-            return nodeTlsRequest + tlsCert + ".csr";
+            return nodeTlsRequest + tlsCert + to_string(CertSerial) + ".csr";
         }
     }
     else if (fileType == "pem")
     {
         if (useType == "account")
         {
-            return nodeAccountCert + accountCert + ".pem";
+            return nodeAccountCert + accountCert + to_string(CertSerial) + ".pem";
         }
         else
         {
-            return nodetlsCert + tlsCert + ".csr";
+            return nodetlsCert + tlsCert + to_string(CertSerial) + ".csr";
         }
     }
     else if (fileType == "crl")

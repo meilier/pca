@@ -1,6 +1,7 @@
 # setup dir
-export CAPATH="/Users/xingweizheng/testecc"
-export WORKDIR="/Users/xingweizheng/github/pca"
+ScirptPath=$(cd `dirname $0`; pwd)
+echo $ScirptPath
+source $ScirptPath/header.sh
 mkdir -p $CAPATH
 cp $WORKDIR/Scripts/openssl.cnf $CAPATH/
 mkdir -p $CAPATH/certs/account $CAPATH/certs/tls

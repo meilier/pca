@@ -9,8 +9,7 @@ class Cert
     //Cert(Cert const &);
     //void operator=(Cert const &);
     ~Cert();
-    int aCertSerial = 0;
-    int tCertSerial = 0;
+    int CertSerial = 0;
     //root path
     const string CAPATH = "/Users/weizhengxing/cafolder/";
     const string caCert = CAPATH;
@@ -39,7 +38,7 @@ class Cert
         static Cert theSingleton;
         return theSingleton;
     }
-
+    void increaseSerial();
     void signCert(string certType);
     void getAllCerts();
     void revokeCert();
