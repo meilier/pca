@@ -8,18 +8,18 @@ class Cert
     ~Cert();
     int CertSerial = 0;
     //root path
-    const string CAPATH = "/Users/weizhengxing/testecc/";
+    const string CAPATH = "/Users/xingweizheng/testecc/";
     const string caCert = CAPATH;
     //first-tier path
-    const string nodeCert = CAPATH + "certs";
-    const string nodeRequest = CAPATH + "requests";
-    const string nodeCrl = CAPATH + "crl";
+    const string nodeCert = CAPATH + "certs/";
+    const string nodeRequest = CAPATH + "requests/";
+    const string nodeCrl = CAPATH + "crl/";
 
     //sencode-tier path
-    const string nodeAccountCert = nodeCert + "account";
-    const string nodetlsCert = nodeCert + "tls";
-    const string nodeAccountRequest = nodeRequest + "account";
-    const string nodeTlsRequest = nodeRequest + "tls";
+    const string nodeAccountCert = nodeCert + "account/";
+    const string nodetlsCert = nodeCert + "tls/";
+    const string nodeAccountRequest = nodeRequest + "account/";
+    const string nodeTlsRequest = nodeRequest + "tls/";
     //const string nodeAccountCrl = nodeCrl + "account";
     //const string nodeTlsCrl = nodeCrl + "tls";
 

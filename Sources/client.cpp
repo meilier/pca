@@ -25,6 +25,7 @@ void fileProcess(int transType, int certType);
 void receiveProcess();
 void handleProcess();
 void sendProcess();
+void sig_handler(int sig);
 
 int sock_cli;
 fd_set rfds;
@@ -41,10 +42,22 @@ ConcurrentQueue<string> sq;
 //handle message queue
 ConcurrentQueue<string> hq;
 
+static volatile int keepRunning = 1;
+
+void sig_handler(int sig)
+{
+    if (sig == SIGINT)
+    {
+        keepRunning = 0;
+    }
+}
+
 void receiveProcess()
 {
+    printf("start receive Process thread\n");
     while (1)
     {
+        sleep(1);
         /*把可读文件描述符的集合清空*/
         FD_ZERO(&rfds);
         maxfd = 0;
@@ -75,8 +88,9 @@ void receiveProcess()
             char recvbuf[BUFFER_SIZE];
             int len;
             len = recv(sock_cli, recvbuf, sizeof(recvbuf), 0);
+            printf("receiveProcess: receive len is %d \n",len);
             // message branch
-            printf("%s", recvbuf);
+            printf("reveiveProcess get message is %s\n", recvbuf);
             if (string(recvbuf) == SAR)
             {
                 //connect to server file transfer port, such as, 7001
@@ -108,6 +122,7 @@ void receiveProcess()
 
 void sendProcess()
 {
+    printf("start sendProcess thread\n");
     while (1)
     {
         if (!sq.Empty())
@@ -117,12 +132,14 @@ void sendProcess()
         //get message from send queue
         string sqmessage;
         sq.Pop(sqmessage);
+        printf("sendProcess: send message is %s\n", sqmessage.c_str());
         send(sock_cli, sqmessage.c_str(), strlen(sqmessage.c_str()), 0); //send
     }
 }
 
 void handleProcess()
 {
+    printf("start handleProcess thread\n");
     while (1)
     {
         if (!rq.Empty())
@@ -182,6 +199,7 @@ void handleProcess()
  * */
 void fileProcess(int transType, int certType)
 {
+    printf("start fileProcess thread\n");
     int file_cli;
     int readLen, byteNum;
     int MAXLINE = 4096;
@@ -201,7 +219,6 @@ void fileProcess(int transType, int certType)
         perror("connect");
         exit(1);
     }
-
     if (transType == 0)
     {
         //transfer crs file to server
@@ -268,10 +285,10 @@ void fileProcess(int transType, int certType)
     }
 }
 
-
 int main()
 {
     cCert = &cCert->getInstance();
+    signal(SIGINT, sig_handler);
     ///定义sockfd
     sock_cli = socket(AF_INET, SOCK_STREAM, 0);
     ///定义sockaddr_in
@@ -287,6 +304,7 @@ int main()
         perror("connect");
         exit(1);
     }
+    printf("connect to server successfully\n");
     //thread : send
     std::thread t1(sendProcess);
     t1.detach();
@@ -300,7 +318,7 @@ int main()
 
     //test Sign Account
     sq.Push(SA);
-    while (1)
+    while (keepRunning)
     {
     }
     close(sock_cli);

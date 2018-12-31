@@ -16,6 +16,8 @@
         "iosfwd": "cpp",
         "istream": "cpp",
         "functional": "cpp",
-        "sstream": "cpp"
+        "sstream": "cpp",
+        "list": "cpp",
+        "thread": "cpp"
     }
 }

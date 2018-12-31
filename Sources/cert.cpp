@@ -11,9 +11,11 @@ using namespace std;
 void Cert::signCert(string certType)
 {
     //call openssl command to sign
-    string signCmd = "openssl ca -in " + getCertFileName("csr", certType) + " -out " + getCertFileName("pem", certType) + "-batch -key meilier";
+    printf("start to sign cert\n");
+    string signCmd = "openssl ca -in " + getCertFileName("csr", certType) + " -out " + getCertFileName("pem", certType) + " -batch -key meilier";
     //Todo: error handling
     popen(signCmd.c_str(), "w");
+    printf("sign cert ok\n");
 }
 
 /* **********
@@ -50,39 +52,45 @@ void Cert::revokeCert()
  */
 string Cert::getCertFileName(string fileType, string useType)
 {
+    string returnmsg;
     if (fileType == "csr")
     {
         if (useType == "account")
         {
 
-            return nodeAccountRequest + accountCert + to_string(CertSerial) + ".csr";
+            returnmsg = nodeAccountRequest + accountCert + to_string(CertSerial) + ".csr";
         }
         else
         {
-            return nodeTlsRequest + tlsCert + to_string(CertSerial) + ".csr";
+            returnmsg = nodeTlsRequest + tlsCert + to_string(CertSerial) + ".csr";
         }
     }
     else if (fileType == "pem")
     {
         if (useType == "account")
         {
-            return nodeAccountCert + accountCert + to_string(CertSerial) + ".pem";
+            returnmsg = nodeAccountCert + accountCert + to_string(CertSerial) + ".pem";
         }
         else
         {
-            return nodetlsCert + tlsCert + to_string(CertSerial) + ".pem";
+            returnmsg = nodetlsCert + tlsCert + to_string(CertSerial) + ".pem";
         }
     }
     else if (fileType == "crl")
     {
         //crl file contains all certs that have been invoked
-        return nodeCrl + "invoke.crl";
+        returnmsg = nodeCrl + "invoke.crl";
     }
     else if (fileType == "compact")
     {
-        return CAPATH + "certs.tar.gz";
+        returnmsg = CAPATH + "certs.tar.gz";
     }
-    return "error";
+    else
+    {
+        returnmsg = "error";
+    }
+    printf("Cert::getCertFileName : returnmsg is %s",returnmsg.c_str());
+    return returnmsg;
 }
 
 void Cert::increaseSerial()
@@ -104,5 +112,5 @@ Cert::~Cert()
     //call setup.sh
     string signCmd = "sh " + string(WORKDIR) + "/Scripts/clear.sh";
     //Todo: error handling
-    popen(signCmd.c_str(), "w");
+    //popen(signCmd.c_str(), "w");
 }

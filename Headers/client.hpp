@@ -7,17 +7,17 @@ class ClientCert
     //void operator=(Cert const &);
     ~ClientCert();
     //root path
-    const string CLIENTPATH = "/Users/weizhengxing/client/";
+    const string CLIENTPATH = "/Users/xingweizheng/client/";
     //first-tier path
-    const string nodeCert = CLIENTPATH + "certs";
-    const string nodeRequest = CLIENTPATH + "requests";
-    const string nodeCrl = CLIENTPATH + "crl";
+    const string nodeCert = CLIENTPATH + "certs/";
+    const string nodeRequest = CLIENTPATH + "requests/";
+    const string nodeCrl = CLIENTPATH + "crl/";
 
     //sencode-tier path
-    const string nodeAccountCert = nodeCert + "account";
-    const string nodetlsCert = nodeCert + "tls";
-    const string nodeAccountRequest = nodeRequest + "account";
-    const string nodeTlsRequest = nodeRequest + "tls";
+    const string nodeAccountCert = nodeCert + "account/";
+    const string nodetlsCert = nodeCert + "tls/";
+    const string nodeAccountRequest = nodeRequest + "account/";
+    const string nodeTlsRequest = nodeRequest + "tls/";
     //const string nodeAccountCrl = nodeCrl + "account";
     //const string nodeTlsCrl = nodeCrl + "tls";
 

@@ -15,9 +15,9 @@ tls1.pem
 .
 ├── certs
 │   ├── account
-│   │   └── some_server.pem
+│   │   └── account0.pem
 │   └── tls
-│       └── node1tlscert.pem
+│       └── tls1.pem
 ├── crl
 │   └── crl.pem
 ├── crlnumber
@@ -34,9 +34,9 @@ tls1.pem
 │   └── cakey.pem
 ├── requests
 │   ├── account
-│   │   └── some_server.csr
+│   │   └── account1.csr
 │   └── tls
-│       └── node1tls.csr
+│       └── tls1.csr
 ├── serial
 └── serial.old
 
@@ -54,13 +54,13 @@ tls.pem
 .
 ├── certs
 │   ├── account
-│   │   └── testaccount.key.pem
+│   │   └── account.key.pem
 │   └── tls
-│       └── testtls.key.pem
+│       └── tls.key.pem
 ├── crl
 ├── openssl.cnf
 └── requests
     ├── account
-    │   └── test1.csr.pem
+    │   └── account.csr
     └── tls
-        └── test1.csr.pem
+        └── tls.csr

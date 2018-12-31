@@ -29,6 +29,7 @@ void fileProcess(int transType, int certType);
 void receiveProcess();
 void handleProcess();
 void sendProcess();
+void sig_handler(int sig);
 
 // for easy mode ,we ues single process
 int sema = 1;
@@ -50,6 +51,16 @@ ConcurrentQueue<string> sq;
 //handle message queue
 ConcurrentQueue<string> hq;
 
+static volatile int keepRunning = 1;
+
+void sig_handler(int sig)
+{
+    if (sig == SIGINT)
+    {
+        keepRunning = 0;
+    }
+}
+
 void getConn()
 {
     while (1)
@@ -60,7 +71,9 @@ void getConn()
             printf("start message listening thread at 7000\n");
             int conn = accept(messageSock, (struct sockaddr *)&servaddr, &len);
             li.push_back(conn);
-            printf("%d\n", conn);
+            for (list<int>::iterator it = li.begin(); it != li.end(); ++it)
+                cout << ' ' << *it << endl;
+            printf("getConn: the connect fd is %d\n", conn);
             sema--;
             mCert->increaseSerial();
         }
@@ -105,17 +118,18 @@ void receiveProcess()
                 char rbuf[1024];
                 memset(rbuf, 0, sizeof(rbuf));
                 int len = recv(*it, rbuf, sizeof(rbuf), 0);
-                printf("%s", rbuf);
+                printf("reveiceProcess: the message is %s\n", rbuf);
                 //detect if socket has closed
                 if (len == 0)
                 {
                     if (errno != EINTR)
                         sema++;
                 }
-                if (strcmp(rbuf, SA.c_str()))
+
+                if (string(rbuf) == SA.c_str())
                 {
                     //do get account csr file and sign and return pem
-                    printf("start to sign account cert");
+                    printf("start to sign account cert\n");
 
                     //new thread to write file , sign , send done message , send pem file
                     //first prepare a listenning socket and accept, then send ok message to
@@ -127,39 +141,40 @@ void receiveProcess()
                     // int len = send(*it, sbuf, sizeof(sbuf), 0);
                     rq.Push(SA);
                 }
-                else if (strcmp(rbuf, ST.c_str()))
+                else if (string(rbuf) == ST.c_str())
                 {
                     //do get tls csr file and sign and return pem
-                    printf("start to sign tls cert");
+                    printf("rbuf is fule %s", rbuf);
+                    printf("start to sign tls cert\n");
                     // char sbuf[1024];
                     // strcpy(sbuf,"ready-sign-tls");
                     // int len = send(*it, sbuf, sizeof(sbuf), 0);
                     rq.Push(ST);
                 }
-                else if (strcmp(rbuf, GC.c_str()))
+                else if (string(rbuf) == GC.c_str())
                 {
                     // transport all pem files
-                    printf("start to transport pem files to nodes");
+                    printf("start to transport pem files to nodes\n");
                     // mCert->getAllCerts();
                     rq.Push(GC);
                 }
-                else if (strcmp(rbuf, GRL.c_str()))
+                else if (string(rbuf) == GRL.c_str())
                 {
                     // transport all pem files
-                    printf("start to transport cert revocation list file to nodes");
+                    printf("start to transport cert revocation list file to nodes\n");
                     // mCert->getAllCerts();
                     rq.Push(GRL);
                 }
-                else if (strcmp(rbuf, IC.c_str()))
+                else if (string(rbuf) == IC.c_str())
                 {
                     // transport all pem files
-                    printf("start to transport pem files to nodes");
+                    printf("start to transport pem files to nodes\n");
                     // mCert->revokeCert();
                     rq.Push(IC);
                 }
                 else
                 {
-                    printf("wrong message");
+                    printf("wrong message\n");
                 }
             }
         }
@@ -186,7 +201,8 @@ void handleProcess()
                 //main process ready to receive csr file
                 std::thread t4(fileProcess, 0, 0);
                 t4.detach();
-                sq.Push("SAR");
+                printf("handleProcess:why can not be here\n");
+                sq.Push(SAR);
 
                 //send sign-ok message
             }
@@ -195,26 +211,26 @@ void handleProcess()
                 //receive tls crs file
                 std::thread t4(fileProcess, 0, 1);
                 t4.detach();
-                sq.Push("STR");
+                sq.Push(STR);
             }
             else if (rpmessage == GC)
             {
                 //send certs.tar.gz to client
                 std::thread t4(fileProcess, 0, 2);
                 t4.detach();
-                sq.Push("GCR");
+                sq.Push(GCR);
             }
             else if (rpmessage == GRL)
             {
                 //send certs.tar.gz to client
                 std::thread t4(fileProcess, 0, 3);
                 t4.detach();
-                sq.Push("GRLR");
+                sq.Push(GRLR);
             }
             else if (rpmessage == IC)
             {
                 //send invoke.crl to client
-                sq.Push("GCR");
+                sq.Push(GCR);
             }
             else
             {
@@ -260,11 +276,13 @@ void fileProcess(int transType, int certType)
             int connfd = 0;
             int byteNum;
             char buff[MAXLINE];
+            printf("fileProcess: start file transfer listening at 7001\n");
             if ((connfd = accept(fileSock, (struct sockaddr *)&fileaddr, &filelen)) == -1)
             {
                 printf("accept socket error: %s(errno: %d)", strerror(errno), errno);
                 continue;
             }
+            printf("fileProcess: get file connection from client\n");
             //write file
             std::ofstream csrfile;
             if (certType == 0)
@@ -278,13 +296,18 @@ void fileProcess(int transType, int certType)
             while (1)
             {
                 byteNum = read(connfd, buff, MAXLINE);
+                printf("fileProcess: why thead not return %d\n", byteNum);
                 if (byteNum == 0)
+                {
                     break;
+                }
+
                 csrfile.write(buff, byteNum);
             }
             csrfile.close();
             //send file get ok message to handle process
             certType == 0 ? hq.Push(GACO) : hq.Push(GTCO);
+            printf("should be ready to return\n");
             return;
         }
     }
@@ -358,30 +381,35 @@ void sendProcess()
         // }
         string sqmessage;
         sq.Pop(sqmessage);
+        printf("sendProcess: get message %s\n", sqmessage.c_str());
         std::list<int>::iterator it;
+        it = li.begin();
         if (sqmessage == SAR)
         {
             //get csr file
-            send(*it, SAR.c_str(), sizeof(SAR.c_str()), 0);
+            const char *c_s = SAR.c_str();
+            char ff[11];
+            printf("whyaaaaaaaa %s  %d  %d %d %d \n", SAR.c_str(), sizeof(*SAR.c_str()), sizeof(c_s), sizeof("ssssssssss"), sizeof(ff));
+            send(*it, SAR.c_str(), SAR.length(), 0);
         }
         else if (sqmessage == SAO)
         {
             //ready to tranport pem to client
             std::thread t4(fileProcess, 1, 0);
             t4.detach();
-            send(*it, SAO.c_str(), sizeof(SAO.c_str()), 0);
+            send(*it, SAO.c_str(), SAO.length(), 0);
         }
         else if (sqmessage == STR)
         {
             //get csr file
-            send(*it, STR.c_str(), sizeof(STR.c_str()), 0);
+            send(*it, STR.c_str(), STR.length(), 0);
         }
         else if (sqmessage == STO)
         {
             //ready to tranport pem to client
             std::thread t4(fileProcess, 1, 1);
             t4.detach();
-            send(*it, STO.c_str(), sizeof(STO.c_str()), 0);
+            send(*it, STO.c_str(), STO.length(), 0);
         }
         else
         {
@@ -393,6 +421,7 @@ void sendProcess()
 int main()
 {
     mCert = &mCert->getInstance();
+    signal(SIGINT, sig_handler);
     //new message socket
     messageSock = socket(AF_INET, SOCK_STREAM, 0);
     memset(&servaddr, 0, sizeof(servaddr));
@@ -443,8 +472,9 @@ int main()
     //thread : handle
     std::thread t3(handleProcess);
     t3.detach();
-    while (1)
+    while (keepRunning)
     {
     }
+    cout << "Terminated by Ctrl+C signal." << endl;
     return 0;
 }
