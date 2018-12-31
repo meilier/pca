@@ -1,7 +1,4 @@
 #include "common.hpp"
-
-int exitTime = 0;
-
 class Cert
 {
   private:
@@ -11,7 +8,7 @@ class Cert
     ~Cert();
     int CertSerial = 0;
     //root path
-    const string CAPATH = "/Users/weizhengxing/cafolder/";
+    const string CAPATH = "/Users/weizhengxing/testecc/";
     const string caCert = CAPATH;
     //first-tier path
     const string nodeCert = CAPATH + "certs";
@@ -46,21 +43,3 @@ class Cert
     string getCertFileName(string fileType, string useType = "");
 };
 
-Cert::Cert()
-{
-    printf("Init CA Server\n");
-    //call setup.sh
-    string signCmd = "sh " + string(WORKDIR) + "/Scripts/setup.sh";
-    //Todo: error handling
-    popen(signCmd.c_str(), "w");
-}
-Cert::~Cert()
-{
-    printf("exitTime is %d\n", exitTime);
-    printf("Clear CA Server\n");
-    //call setup.sh
-    string signCmd = "sh " + string(WORKDIR) + "/Scripts/clear.sh";
-    //Todo: error handling
-    popen(signCmd.c_str(), "w");
-    exitTime++;
-}

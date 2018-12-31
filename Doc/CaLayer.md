@@ -1,4 +1,16 @@
+# PCA
+
 ## CA Layer
+
+**Name Rule**
+cakey.pem
+cacert.pem
+
+account1.csr
+account1.pem
+
+tls1.csr
+tls1.pem
 
 .
 ├── certs
@@ -27,3 +39,28 @@
 │       └── node1tls.csr
 ├── serial
 └── serial.old
+
+## Client Layer
+
+**Name Rule**
+account.key.pem
+account.csr
+account.pem
+
+tls.key.pem
+tls.csr
+tls.pem
+
+.
+├── certs
+│   ├── account
+│   │   └── testaccount.key.pem
+│   └── tls
+│       └── testtls.key.pem
+├── crl
+├── openssl.cnf
+└── requests
+    ├── account
+    │   └── test1.csr.pem
+    └── tls
+        └── test1.csr.pem

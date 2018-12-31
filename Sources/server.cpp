@@ -24,6 +24,12 @@
 #define IP "127.0.0.1"
 #define MAXLINE 4096
 
+void getConn();
+void fileProcess(int transType, int certType);
+void receiveProcess();
+void handleProcess();
+void sendProcess();
+
 // for easy mode ,we ues single process
 int sema = 1;
 int messageSock;
@@ -51,6 +57,7 @@ void getConn()
         //here we may tell the other client that some client is connecting
         if (sema > 0)
         {
+            printf("start message listening thread at 7000\n");
             int conn = accept(messageSock, (struct sockaddr *)&servaddr, &len);
             li.push_back(conn);
             printf("%d\n", conn);
@@ -69,6 +76,7 @@ void receiveProcess()
     struct timeval tv;
     tv.tv_sec = 0;
     tv.tv_usec = 0;
+    printf("start receive thread\n");
     while (1)
     {
         std::list<int>::iterator it;
@@ -135,6 +143,13 @@ void receiveProcess()
                     // mCert->getAllCerts();
                     rq.Push(GC);
                 }
+                else if (strcmp(rbuf, GRL.c_str()))
+                {
+                    // transport all pem files
+                    printf("start to transport cert revocation list file to nodes");
+                    // mCert->getAllCerts();
+                    rq.Push(GRL);
+                }
                 else if (strcmp(rbuf, IC.c_str()))
                 {
                     // transport all pem files
@@ -157,6 +172,7 @@ void receiveProcess()
  * */
 void handleProcess()
 {
+    printf("start handle thread\n");
     while (1)
     {
         if (!rq.Empty())
@@ -188,11 +204,16 @@ void handleProcess()
                 t4.detach();
                 sq.Push("GCR");
             }
+            else if (rpmessage == GRL)
+            {
+                //send certs.tar.gz to client
+                std::thread t4(fileProcess, 0, 3);
+                t4.detach();
+                sq.Push("GRLR");
+            }
             else if (rpmessage == IC)
             {
                 //send invoke.crl to client
-                std::thread t4(fileProcess, 0, 3);
-                t4.detach();
                 sq.Push("GCR");
             }
             else
@@ -226,7 +247,7 @@ void handleProcess()
 /**********
  * fileProcess recv or send file from or to client
  * transType: 0 get file from client , certType 0 get account csr, 1 get tls csr
- * transType  1 send file to client, 0 send account pem, 1 send tls pem , 2 send certs.tar.gz to client, 3 send crl file to client
+ * certType  1 send file to client, 0 send account pem, 1 send tls pem , 2 send certs.tar.gz to client, 3 send crl file to client
  * */
 void fileProcess(int transType, int certType)
 {
@@ -238,7 +259,7 @@ void fileProcess(int transType, int certType)
         {
             int connfd = 0;
             int byteNum;
-            char buff[4096];
+            char buff[MAXLINE];
             if ((connfd = accept(fileSock, (struct sockaddr *)&fileaddr, &filelen)) == -1)
             {
                 printf("accept socket error: %s(errno: %d)", strerror(errno), errno);
@@ -319,6 +340,7 @@ void fileProcess(int transType, int certType)
 
 void sendProcess()
 {
+    printf("start send thread\n");
     while (1)
     {
         if (!sq.Empty())
@@ -340,26 +362,26 @@ void sendProcess()
         if (sqmessage == SAR)
         {
             //get csr file
-            send(*it, SAR.c_str, sizeof(SAR.c_str), 0);
+            send(*it, SAR.c_str(), sizeof(SAR.c_str()), 0);
         }
         else if (sqmessage == SAO)
         {
             //ready to tranport pem to client
             std::thread t4(fileProcess, 1, 0);
             t4.detach();
-            send(*it, SAO.c_str, sizeof(SAO.c_str), 0);
+            send(*it, SAO.c_str(), sizeof(SAO.c_str()), 0);
         }
         else if (sqmessage == STR)
         {
             //get csr file
-            send(*it, STR.c_str, sizeof(STR.c_str), 0);
+            send(*it, STR.c_str(), sizeof(STR.c_str()), 0);
         }
         else if (sqmessage == STO)
         {
             //ready to tranport pem to client
             std::thread t4(fileProcess, 1, 1);
             t4.detach();
-            send(*it, STO.c_str, sizeof(STO.c_str), 0);
+            send(*it, STO.c_str(), sizeof(STO.c_str()), 0);
         }
         else
         {
@@ -407,10 +429,10 @@ int main()
     }
     len = sizeof(fileaddr);
 
-    //thread : while ==>> accpet
+    //thread : getconnection from client
     std::thread t(getConn);
     t.detach();
-    //printf("done\n");
+    printf("start get\n");
     //thread : send
     std::thread t1(sendProcess);
     t1.detach();

@@ -9,18 +9,28 @@
 #include <fcntl.h>
 #include <sys/shm.h>
 #include <thread>
+#include <iostream>
+#include <fstream>
+#include <sstream>
 #include "common.hpp"
 #include "cmessage.hpp"
 #include "cqueue.hpp"
+#include "client.hpp"
 
 #define MYPORT 7000
 #define FILEPORT 7001
 #define BUFFER_SIZE 1024
 
+void fileProcess(int transType, int certType);
+void receiveProcess();
+void handleProcess();
+void sendProcess();
+
 int sock_cli;
 fd_set rfds;
 struct timeval tv;
 int retval, maxfd;
+ClientCert *cCert;
 
 //recv message queue
 ConcurrentQueue<string> rq;
@@ -44,7 +54,7 @@ void receiveProcess()
         if (maxfd < sock_cli)
             maxfd = sock_cli;
         /*设置超时时间*/
-        tv.tv_sec = 0;
+        tv.tv_sec = 1;
         tv.tv_usec = 0;
         /*等待聊天*/
         retval = select(maxfd + 1, &rfds, NULL, NULL, &tv);
@@ -126,26 +136,40 @@ void handleProcess()
         {
             //send csr file
             //connect to server file transfer port, such as, 7001
-            std::thread t4(fileProcess, 0, 1);
+            std::thread t4(fileProcess, 0, 0);
             t4.detach();
         }
         else if (rpmessage == SAO)
         {
-            //
-            rq.Push(SAO);
+            //get pem from server
+            std::thread t4(fileProcess, 1, 0);
+            t4.detach();
         }
         else if (rpmessage == STR)
         {
+            std::thread t4(fileProcess, 0, 1);
+            t4.detach();
             rq.Push(STR);
         }
         else if (rpmessage == STO)
         {
-            rq.Push(STO);
+            std::thread t4(fileProcess, 1, 1);
+            t4.detach();
+        }
+        else if (rpmessage == GRLR)
+        {
+            //get certs ready message from server
+            //connect to server to get its crl file
+            std::thread t4(fileProcess, 1, 2);
+            t4.detach();
+            rq.Push(GCR);
         }
         else if (rpmessage == GCR)
         {
             //get certs ready message from server
             //connect to server to get it's certs.tar.gz
+            std::thread t4(fileProcess, 1, 3);
+            t4.detach();
             rq.Push(GCR);
         }
     }
@@ -153,12 +177,15 @@ void handleProcess()
 
 /*********
  * send crs file to server
- * certType: 0 account crs, 1 tls csr.
+ * transType: 0 send to server, 1 get from server
+ * certType: 0 account crs, 1 tls csr, 2 get crl file, 3 get all cert files.
  * */
-void fileProcess(int certType)
+void fileProcess(int transType, int certType)
 {
     int file_cli;
-
+    int readLen, byteNum;
+    int MAXLINE = 4096;
+    char buff[4096];
     ///定义sockfd
     file_cli = socket(AF_INET, SOCK_STREAM, 0);
     ///定义sockaddr_in
@@ -168,26 +195,83 @@ void fileProcess(int certType)
     fileaddr.sin_port = htons(FILEPORT);               ///服务器端口
     fileaddr.sin_addr.s_addr = inet_addr("127.0.0.1"); ///服务器ip
 
-    //连接服务器，成功返回0，错误返回-1
+    //connect to server，0 success，-1 failed
     if (connect(file_cli, (struct sockaddr *)&fileaddr, sizeof(fileaddr)) < 0)
     {
         perror("connect");
         exit(1);
     }
-    //
+
+    if (transType == 0)
+    {
+        //transfer crs file to server
+
+        //open file
+        ifstream sfile;
+        if (certType == 0)
+        {
+            //open account pem file
+            sfile.open(cCert->getCertFileName("csr", "account"), ios::out | ios::in);
+        }
+        else if (certType == 1)
+        {
+            //open tls pem file
+            sfile.open(cCert->getCertFileName("csr", "tls"), ios::out | ios::in);
+        }
+        while (!sfile.eof())
+        {
+            sfile.read(buff, sizeof(buff));
+            readLen = sfile.gcount();
+            send(file_cli, buff, readLen, 0);
+        }
+        sfile.close();
+        //send file get ok message to handle process
+        //may be here, client should send get pem file ok message, otherwise we send it again
+        return;
+        close(file_cli);
+        sfile.close();
+    }
+    else if (transType == 1)
+    {
+        //get from server
+        //write file
+        std::ofstream rfile;
+        if (certType == 0)
+        {
+            //open account pem file
+            rfile.open(cCert->getCertFileName("pem", "account"), ios::out | ios::in);
+        }
+        else if (certType == 1)
+        {
+            //open tls pem file
+            rfile.open(cCert->getCertFileName("pem", "tls"), ios::out | ios::in);
+        }
+        else if (certType == 2)
+        {
+            //open tar.gz file
+            rfile.open(cCert->getCertFileName("compact"), ios::out | ios::in);
+        }
+        else if (certType == 3)
+        {
+            //open csrfile file
+            rfile.open(cCert->getCertFileName("crl"), ios::out | ios::in);
+        }
+        while (1)
+        {
+            byteNum = read(file_cli, buff, MAXLINE);
+            if (byteNum == 0)
+                break;
+            rfile.write(buff, byteNum);
+        }
+        close(file_cli);
+        rfile.close();
+    }
 }
 
-/***********
- * generate client private key and its crs file
- * certType : 0 account , 1 tls.
- * */
-void genCert(int certType){
-
-}
 
 int main()
 {
-
+    cCert = &cCert->getInstance();
     ///定义sockfd
     sock_cli = socket(AF_INET, SOCK_STREAM, 0);
     ///定义sockaddr_in
@@ -213,6 +297,9 @@ int main()
     //thread : handle
     std::thread t3(handleProcess);
     t3.detach();
+
+    //test Sign Account
+    sq.Push(SA);
     while (1)
     {
     }

@@ -1,4 +1,5 @@
 #include "cert.hpp"
+#include "common.hpp"
 #include <fstream>
 #include <sstream>
 #include <stdio.h>
@@ -69,7 +70,7 @@ string Cert::getCertFileName(string fileType, string useType)
         }
         else
         {
-            return nodetlsCert + tlsCert + to_string(CertSerial) + ".csr";
+            return nodetlsCert + tlsCert + to_string(CertSerial) + ".pem";
         }
     }
     else if (fileType == "crl")
@@ -82,4 +83,26 @@ string Cert::getCertFileName(string fileType, string useType)
         return CAPATH + "certs.tar.gz";
     }
     return "error";
+}
+
+void Cert::increaseSerial()
+{
+    CertSerial++;
+}
+
+Cert::Cert()
+{
+    printf("Init CA Server\n");
+    //call setup.sh
+    string signCmd = "sh " + string(WORKDIR) + "/Scripts/setup.sh";
+    //Todo: error handling
+    popen(signCmd.c_str(), "w");
+}
+Cert::~Cert()
+{
+    printf("Clear CA Server\n");
+    //call setup.sh
+    string signCmd = "sh " + string(WORKDIR) + "/Scripts/clear.sh";
+    //Todo: error handling
+    popen(signCmd.c_str(), "w");
 }

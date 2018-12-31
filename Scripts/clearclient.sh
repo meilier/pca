@@ -1,4 +1,5 @@
 # here we may back these files first 
+echo "clear client env"
 ScirptPath=$(cd `dirname $0`; pwd)
 echo $ScirptPath
 source $ScirptPath/header.sh
@@ -15,4 +16,3 @@ else
 fi
 #
 echo "clean all"
-
