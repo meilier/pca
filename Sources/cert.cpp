@@ -12,7 +12,8 @@ void Cert::signCert(string certType)
 {
     //call openssl command to sign
     printf("start to sign cert\n");
-    string signCmd = "openssl ca -in " + getCertFileName("csr", certType) + " -out " + getCertFileName("pem", certType) + " -batch -key meilier";
+    string signCmd = "openssl ca -config " + configPath + " -in " + getCertFileName("csr", certType) + " -out " + getCertFileName("pem", certType) + " -batch -key 123456";
+    printf("this command is %s\n",signCmd.c_str());
     //Todo: error handling
     popen(signCmd.c_str(), "w");
     printf("sign cert ok\n");
@@ -39,9 +40,9 @@ void Cert::revokeCert()
 
     //decoding message
 
-    string invokeAccountCmd = "openssl ca -revoke " + getCertFileName("pem", "account") + " -key meilier";
-    string invokeTlsCmd = "openssl ca -revoke " + getCertFileName("pem", "tls") + " -key meilier";
-    string genCrlCmd = "openssl ca -gencrl -out" + getCertFileName("crl");
+    string invokeAccountCmd = "openssl ca -config " + configPath + " -revoke " + getCertFileName("pem", "account") + " -key meilier";
+    string invokeTlsCmd = "openssl ca -config " + configPath + " -revoke " + getCertFileName("pem", "tls") + " -key meilier";
+    string genCrlCmd = "openssl ca -config " + configPath + " -gencrl -out" + getCertFileName("crl");
     popen(invokeAccountCmd.c_str(), "w");
     popen(invokeTlsCmd.c_str(), "w");
     popen(genCrlCmd.c_str(), "w");
@@ -89,7 +90,7 @@ string Cert::getCertFileName(string fileType, string useType)
     {
         returnmsg = "error";
     }
-    printf("Cert::getCertFileName : returnmsg is %s",returnmsg.c_str());
+    printf("Cert::getCertFileName : returnmsg is %s\n", returnmsg.c_str());
     return returnmsg;
 }
 

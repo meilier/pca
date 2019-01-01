@@ -15,7 +15,7 @@ class ClientCert
 
     //sencode-tier path
     const string nodeAccountCert = nodeCert + "account/";
-    const string nodetlsCert = nodeCert + "tls/";
+    const string nodeTlsCert = nodeCert + "tls/";
     const string nodeAccountRequest = nodeRequest + "account/";
     const string nodeTlsRequest = nodeRequest + "tls/";
     //const string nodeAccountCrl = nodeCrl + "account";

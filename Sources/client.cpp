@@ -241,12 +241,13 @@ void fileProcess(int transType, int certType)
             readLen = sfile.gcount();
             send(file_cli, buff, readLen, 0);
         }
+        printf("sendProcess: send csr successfully\n");
+        //may be the bug is you need to close socket first
+        close(file_cli);
         sfile.close();
         //send file get ok message to handle process
         //may be here, client should send get pem file ok message, otherwise we send it again
         return;
-        close(file_cli);
-        sfile.close();
     }
     else if (transType == 1)
     {

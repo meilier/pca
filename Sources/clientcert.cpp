@@ -24,7 +24,7 @@ string ClientCert::getCertFileName(string fileType, string certType)
         }
         else
         {
-            returnmsg = nodetlsCert + tlsCert + ".pem";
+            returnmsg = nodeTlsCert + tlsCert + ".pem";
         }
     }
     else if (fileType == "crl")
@@ -40,7 +40,7 @@ string ClientCert::getCertFileName(string fileType, string certType)
     {
         returnmsg = "error: incorrect fileType";
     }
-    printf("ClientCert::getCertFileName : returnmsg is %s",returnmsg.c_str());
+    printf("ClientCert::getCertFileName : returnmsg is %s\n",returnmsg.c_str());
     return returnmsg;
 }
 

@@ -1,4 +1,5 @@
 #include "common.hpp"
+
 // control message
 //rq
 string SA = "sign-account";
@@ -20,3 +21,8 @@ string ICR = "invoke-cert-ready";
 //hq
 string GACO = "get-account-csr-ok";
 string GTCO = "get-tls-csr-ok";
+
+
+
+
+

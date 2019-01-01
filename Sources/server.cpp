@@ -41,6 +41,7 @@ socklen_t len;
 socklen_t filelen;
 std::list<int> li;
 Cert *mCert;
+map<string, string> qqq;
 
 //recv message queue
 ConcurrentQueue<string> rq;
@@ -299,16 +300,15 @@ void fileProcess(int transType, int certType)
                 printf("fileProcess: why thead not return %d\n", byteNum);
                 if (byteNum == 0)
                 {
-                    break;
+                    csrfile.close();
+                    //send file get ok message to handle process
+                    certType == 0 ? hq.Push(GACO) : hq.Push(GTCO);
+                    printf("should be ready to return\n");
+                    return;
                 }
 
                 csrfile.write(buff, byteNum);
             }
-            csrfile.close();
-            //send file get ok message to handle process
-            certType == 0 ? hq.Push(GACO) : hq.Push(GTCO);
-            printf("should be ready to return\n");
-            return;
         }
     }
     else

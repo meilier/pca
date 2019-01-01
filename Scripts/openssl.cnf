@@ -1,17 +1,17 @@
 [ ca ]
-default_ca = ca_intermediate
+default_ca = ca_root
 
 [ ca_root ]
-dir               = /Users/xingweizheng/ecc
+dir               = /Users/xingweizheng/testecc
 certs             = $dir/certs
 crl_dir           = $dir/crl
 new_certs_dir     = $dir/newcerts
-database          = $dir/database
+database          = $dir/index.txt
 serial            = $dir/serial
 crlnumber         = $dir/crlnumber
-private_key       = $dir/private/root.key.pem
-certificate       = $dir/certs/root.cert.pem
-crl               = $dir/crl/root.crl.pem
+private_key       = $dir/private/cakey.pem
+certificate       = $dir/private/cacert.pem
+crl               = $dir/crl/crl.pem
 crl_extensions    = ext_crl
 default_md        = sha256
 name_opt          = ca_default
@@ -19,7 +19,7 @@ cert_opt          = ca_default
 default_crl_days  = 30
 default_days      = 3650
 preserve          = no
-policy            = policy_strict
+policy            = policy_loose
 
 [ ca_intermediate ]
 dir               = intermediate
