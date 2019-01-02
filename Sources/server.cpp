@@ -31,7 +31,7 @@ void handleProcess();
 void sendProcess();
 void sig_handler(int sig);
 
-// for easy mode ,we ues single process
+// for easy mode ,we use single process
 int sema = 1;
 int messageSock;
 int fileSock;
@@ -166,12 +166,12 @@ void receiveProcess()
                     // mCert->getAllCerts();
                     rq.Push(GRL);
                 }
-                else if (string(rbuf) == IC.c_str())
+                else if (string(rbuf) == RC.c_str())
                 {
                     // transport all pem files
                     printf("start to transport pem files to nodes\n");
                     // mCert->revokeCert();
-                    rq.Push(IC);
+                    rq.Push(RC);
                 }
                 else
                 {
@@ -217,21 +217,23 @@ void handleProcess()
             else if (rpmessage == GC)
             {
                 //send certs.tar.gz to client
-                std::thread t4(fileProcess, 0, 2);
+                mCert->getAllCerts();
+                std::thread t4(fileProcess, 1, 2);
                 t4.detach();
                 sq.Push(GCR);
             }
             else if (rpmessage == GRL)
             {
-                //send certs.tar.gz to client
-                std::thread t4(fileProcess, 0, 3);
+                //send crl to client
+                std::thread t4(fileProcess, 1, 3);
                 t4.detach();
                 sq.Push(GRLR);
             }
-            else if (rpmessage == IC)
+            else if (rpmessage == RC)
             {
-                //send invoke.crl to client
-                sq.Push(GCR);
+                //invoke this client account and tls cert
+                mCert->revokeCert();
+
             }
             else
             {
@@ -335,7 +337,7 @@ void fileProcess(int transType, int certType)
             }
             catch (exception e)
             {
-                cout << "execption aaaaa !!!!!" <<endl;
+                cout << "execption aaaaa !!!!!" << endl;
                 cout << e.what() << endl;
             }
             //open file
@@ -372,6 +374,7 @@ void fileProcess(int transType, int certType)
             printf("fileProcess:here2\n");
             close(connfd);
             sfile.close();
+            //sq.Push("SPO");
             //send file get ok message to handle process
             //may be here, client should send get pem file ok message, otherwise we send it again
             return;
@@ -407,14 +410,12 @@ void sendProcess()
             //get csr file
             const char *c_s = SAR.c_str();
             char ff[11];
-            printf("whyaaaaaaaa %s  %d  %d %d %d \n", SAR.c_str(), sizeof(*SAR.c_str()), sizeof(c_s), sizeof("ssssssssss"), sizeof(ff));
+            printf("sendProcess:whyaaaaaaaa %s  %d  %d %d %d \n", SAR.c_str(), sizeof(*SAR.c_str()), sizeof(c_s), sizeof("ssssssssss"), sizeof(ff));
             send(*it, SAR.c_str(), SAR.length(), 0);
         }
         else if (sqmessage == SAO)
         {
             //ready to tranport pem to client
-            std::thread t4(fileProcess, 1, 0);
-            t4.detach();
             send(*it, SAO.c_str(), SAO.length(), 0);
         }
         else if (sqmessage == STR)
@@ -425,9 +426,15 @@ void sendProcess()
         else if (sqmessage == STO)
         {
             //ready to tranport pem to client
-            std::thread t4(fileProcess, 1, 1);
-            t4.detach();
             send(*it, STO.c_str(), STO.length(), 0);
+        }
+        else if (sqmessage == GCR)
+        {
+            send(*it, GCR.c_str(), GCR.length(), 0);
+        }
+        else if (sqmessage == GRLR)
+        {
+            send(*it, GRLR.c_str(), GRLR.length(), 0);
         }
         else
         {

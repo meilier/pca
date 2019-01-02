@@ -13,7 +13,7 @@ void Cert::signCert(string certType)
     //call openssl command to sign
     printf("start to sign cert\n");
     string signCmd = "openssl ca -config " + configPath + " -in " + getCertFileName("csr", certType) + " -out " + getCertFileName("pem", certType) + " -batch -key 123456";
-    printf("this command is %s\n",signCmd.c_str());
+    printf("this command is %s\n", signCmd.c_str());
     //Todo: error handling
     popen(signCmd.c_str(), "w");
     printf("sign cert ok\n");
@@ -25,7 +25,7 @@ void Cert::signCert(string certType)
 void Cert::getAllCerts()
 {
     //wait for an abstract
-    string compactCmd = " tar -zcvf certs.tar.gz certs/";
+    string compactCmd = " tar -zcvf " + CAPATH + "/certs.tar.gz" + " -C " + CAPATH + " certs ";
     popen(compactCmd.c_str(), "w");
 }
 

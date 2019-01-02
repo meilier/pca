@@ -117,6 +117,12 @@ void receiveProcess()
                 //connect to server to get it's certs.tar.gz
                 rq.Push(GCR);
             }
+            else if (string(recvbuf) == GRLR)
+            {
+                //get certs ready message from server
+                //connect to server to get it's certs.tar.gz
+                rq.Push(GRLR);
+            }
             memset(recvbuf, 0, sizeof(recvbuf));
         }
     }
@@ -181,16 +187,15 @@ void handleProcess()
         {
             //get certs ready message from server
             //connect to server to get its crl file
-            std::thread t4(fileProcess, 1, 2);
+            std::thread t4(fileProcess, 1, 3);
             t4.detach();
         }
         else if (rpmessage == GCR)
         {
             //get certs ready message from server
             //connect to server to get it's certs.tar.gz
-            std::thread t4(fileProcess, 1, 3);
+            std::thread t4(fileProcess, 1, 2);
             t4.detach();
-            rq.Push(GCR);
         }
     }
 }
@@ -198,7 +203,7 @@ void handleProcess()
 /*********
  * send crs file to server
  * transType: 0 send to server, 1 get from server
- * certType: 0 account crs, 1 tls csr, 2 get crl file, 3 get all cert files.
+ * certType: 0 account crs, 1 tls csr, 2 get all certs file, 3 get crl file.
  * */
 void fileProcess(int transType, int certType)
 {
@@ -330,7 +335,14 @@ int main()
 
     //test Sign Account
     sq.Push(ST);
-    //sq.Push(SA);
+    sleep(6);
+    sq.Push(SA);
+    sleep(6);
+    sq.Push(GC);
+    sleep(6);
+    sq.Push(GRL);
+    sleep(6);
+    sq.Push(RC);
     while (keepRunning)
     {
     }

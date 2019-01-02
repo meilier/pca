@@ -8,6 +8,10 @@ mkdir -p $CAPATH/certs/account $CAPATH/certs/tls
 mkdir -p $CAPATH/requests/account $CAPATH/requests/tls
 mkdir -p $CAPATH/crl $CAPATH/private $CAPATH/newcerts
 touch $CAPATH/index.txt
+
+# test crl file
+echo 'aaaaaaaaaaa' > $CAPATH/crl/invoke.crl
+
 echo '00' > $CAPATH/serial
 echo "set up directoty ok" 
 
