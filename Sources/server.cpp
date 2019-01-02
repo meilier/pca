@@ -246,12 +246,16 @@ void handleProcess()
             {
                 //sign account certificate
                 mCert->signCert("account");
+                std::thread t4(fileProcess, 1, 0);
+                t4.detach();
                 sq.Push(SAO);
             }
             else if (hqmessage == GTCO)
             {
                 //sign tls certificate
                 mCert->signCert("tls");
+                std::thread t4(fileProcess, 1, 1);
+                t4.detach();
                 sq.Push(STO);
             }
         }
@@ -263,11 +267,12 @@ void handleProcess()
 }
 /**********
  * fileProcess recv or send file from or to client
- * transType: 0 get file from client , certType 0 get account csr, 1 get tls csr
- * certType  1 send file to client, 0 send account pem, 1 send tls pem , 2 send certs.tar.gz to client, 3 send crl file to client
+ * transType: 0 get file from client . certType: 0 get account csr, 1 get tls csr
+ * transType: 1 send file to client. certType: 1 send file to client, 0 send account pem, 1 send tls pem , 2 send certs.tar.gz to client, 3 send crl file to client
  * */
 void fileProcess(int transType, int certType)
 {
+
     printf("======waiting for client's request======\n");
     if (transType == 0)
     {
@@ -300,13 +305,13 @@ void fileProcess(int transType, int certType)
                 printf("fileProcess: why thead not return %d\n", byteNum);
                 if (byteNum == 0)
                 {
+                    close(connfd);
                     csrfile.close();
                     //send file get ok message to handle process
                     certType == 0 ? hq.Push(GACO) : hq.Push(GTCO);
                     printf("should be ready to return\n");
                     return;
                 }
-
                 csrfile.write(buff, byteNum);
             }
         }
@@ -320,10 +325,18 @@ void fileProcess(int transType, int certType)
             int byteNum;
             char buff[4096];
             int readLen = 0;
-            if ((connfd = accept(fileSock, (struct sockaddr *)&fileaddr, &filelen)) == -1)
+            try
             {
-                printf("accept socket error: %s(errno: %d)", strerror(errno), errno);
-                continue;
+                if ((connfd = accept(fileSock, (struct sockaddr *)&fileaddr, &filelen)) == -1)
+                {
+                    printf("accept socket error: %s(errno: %d)", strerror(errno), errno);
+                    continue;
+                }
+            }
+            catch (exception e)
+            {
+                cout << "execption aaaaa !!!!!" <<endl;
+                cout << e.what() << endl;
             }
             //open file
             ifstream sfile;
@@ -349,10 +362,15 @@ void fileProcess(int transType, int certType)
             }
             while (!sfile.eof())
             {
+                printf("fileProcess:ready to send pem file\n");
                 sfile.read(buff, sizeof(buff));
+                //printf("buff is %s\n",buff);
                 readLen = sfile.gcount();
                 send(connfd, buff, readLen, 0);
+                printf("fileProcess:here1\n");
             }
+            printf("fileProcess:here2\n");
+            close(connfd);
             sfile.close();
             //send file get ok message to handle process
             //may be here, client should send get pem file ok message, otherwise we send it again
@@ -366,7 +384,7 @@ void sendProcess()
     printf("start send thread\n");
     while (1)
     {
-        if (!sq.Empty())
+        if (sq.Empty())
         {
             continue;
         }

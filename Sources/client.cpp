@@ -83,12 +83,11 @@ void receiveProcess()
         }
         else
         {
-            /*服务器发来了消息*/
 
             char recvbuf[BUFFER_SIZE];
             int len;
             len = recv(sock_cli, recvbuf, sizeof(recvbuf), 0);
-            printf("receiveProcess: receive len is %d \n",len);
+            printf("receiveProcess: receive len is %d \n", len);
             // message branch
             printf("reveiveProcess get message is %s\n", recvbuf);
             if (string(recvbuf) == SAR)
@@ -107,7 +106,10 @@ void receiveProcess()
             }
             else if (string(recvbuf) == STO)
             {
+                printf("Sign tls ok here\n");
                 rq.Push(STO);
+                rq.Empty() ? printf("yes") : printf("no");
+                printf("Sign tls ok here?\n");
             }
             else if (string(recvbuf) == GCR)
             {
@@ -125,7 +127,7 @@ void sendProcess()
     printf("start sendProcess thread\n");
     while (1)
     {
-        if (!sq.Empty())
+        if (sq.Empty())
         {
             continue;
         }
@@ -142,13 +144,16 @@ void handleProcess()
     printf("start handleProcess thread\n");
     while (1)
     {
-        if (!rq.Empty())
+        if (rq.Empty())
         {
+            sleep(1);
             continue;
         }
+        printf("?????why not here\n");
         //get message from queue
         string rpmessage;
         rq.Pop(rpmessage);
+        printf("Get message from rq is %s \n", rpmessage.c_str());
         if (rpmessage == SAR)
         {
             //send csr file
@@ -166,7 +171,6 @@ void handleProcess()
         {
             std::thread t4(fileProcess, 0, 1);
             t4.detach();
-            rq.Push(STR);
         }
         else if (rpmessage == STO)
         {
@@ -179,7 +183,6 @@ void handleProcess()
             //connect to server to get its crl file
             std::thread t4(fileProcess, 1, 2);
             t4.detach();
-            rq.Push(GCR);
         }
         else if (rpmessage == GCR)
         {
@@ -241,7 +244,7 @@ void fileProcess(int transType, int certType)
             readLen = sfile.gcount();
             send(file_cli, buff, readLen, 0);
         }
-        printf("sendProcess: send csr successfully\n");
+        printf("fileProcess: send csr successfully\n");
         //may be the bug is you need to close socket first
         close(file_cli);
         sfile.close();
@@ -257,32 +260,40 @@ void fileProcess(int transType, int certType)
         if (certType == 0)
         {
             //open account pem file
-            rfile.open(cCert->getCertFileName("pem", "account"), ios::out | ios::in);
+            rfile.open(cCert->getCertFileName("pem", "account"), ios::out);
         }
         else if (certType == 1)
         {
             //open tls pem file
-            rfile.open(cCert->getCertFileName("pem", "tls"), ios::out | ios::in);
+            rfile.open(cCert->getCertFileName("pem", "tls"), ios::out);
         }
         else if (certType == 2)
         {
             //open tar.gz file
-            rfile.open(cCert->getCertFileName("compact"), ios::out | ios::in);
+            rfile.open(cCert->getCertFileName("compact"), ios::out);
         }
         else if (certType == 3)
         {
             //open csrfile file
-            rfile.open(cCert->getCertFileName("crl"), ios::out | ios::in);
+            rfile.open(cCert->getCertFileName("crl"), ios::out);
         }
         while (1)
         {
+            printf("fileProcess:ready to get pem file\n");
             byteNum = read(file_cli, buff, MAXLINE);
             if (byteNum == 0)
+            {
+                printf("fileProcess:here1\n");
                 break;
+            }
+
+            //printf("buff is %s\n", buff);
             rfile.write(buff, byteNum);
         }
+        printf("fileProcess:here2\n");
         close(file_cli);
         rfile.close();
+        return;
     }
 }
 
@@ -318,7 +329,8 @@ int main()
     t3.detach();
 
     //test Sign Account
-    sq.Push(SA);
+    sq.Push(ST);
+    //sq.Push(SA);
     while (keepRunning)
     {
     }

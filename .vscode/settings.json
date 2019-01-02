@@ -7,7 +7,6 @@
         "initializer_list": "cpp",
         "new": "cpp",
         "stdexcept": "cpp",
-        "type_traits": "cpp",
         "typeinfo": "cpp",
         "algorithm": "cpp",
         "iostream": "cpp",
@@ -18,6 +17,8 @@
         "functional": "cpp",
         "sstream": "cpp",
         "list": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "ostream": "cpp",
+        "type_traits": "cpp"
     }
 }
