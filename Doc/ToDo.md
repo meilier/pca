@@ -1,5 +1,9 @@
 # bug
 
+## change thread loop to semaphore
+
+
+
 ## bug1
 
 Cert::getCertFileName : returnmsg is /Users/xingweizheng/testecc/requests/account/accountCert1.csrfileProcess: why thead not return 538
@@ -49,3 +53,5 @@ next, I'll see why sq.Push(SAO) don't work.
                 mCert->signCert("account");
                 sq.Push(SAO);
         249 }
+
+
