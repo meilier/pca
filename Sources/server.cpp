@@ -27,7 +27,8 @@
 void getConn();
 void fileProcess(int transType, int certType);
 void receiveProcess();
-void handleProcess();
+void handleRqProcess();
+void handleHqProcess();
 void sendProcess();
 void sig_handler(int sig);
 
@@ -52,7 +53,12 @@ ConcurrentQueue<string> sq;
 //handle message queue
 ConcurrentQueue<string> hq;
 
+// ctrl + c interupt
 static volatile int keepRunning = 1;
+
+//getConn mutex condition_variable for non-loop
+mutex mtx;
+condition_variable cv;
 
 void sig_handler(int sig)
 {
@@ -78,6 +84,12 @@ void getConn()
             sema--;
             mCert->increaseSerial();
         }
+        std::unique_lock<std::mutex> lock(mtx);
+        while (sema <= 0)
+        {
+            cv.wait(lock);
+        }
+        //printf("still loop\n");
     }
 }
 
@@ -125,6 +137,8 @@ void receiveProcess()
                 {
                     if (errno != EINTR)
                         sema++;
+                    std::lock_guard<std::mutex> lock(mtx);
+                    cv.notify_one();
                 }
 
                 if (string(rbuf) == SA.c_str())
@@ -184,86 +198,88 @@ void receiveProcess()
 }
 
 /*******
- * handleProcess(): handle message in rq-- receive, and send result to sq -- sendqueue.
+ * handleRqProcess(): handle message in rq-- receive, and send result to sq -- sendqueue.
  * */
-void handleProcess()
+void handleRqProcess()
 {
-    printf("start handle thread\n");
+    printf("start handle receive queue thread\n");
     while (1)
     {
-        if (!rq.Empty())
+
+        //get message from queue
+        string rpmessage;
+        rq.Pop(rpmessage);
+        if (rpmessage == SA)
         {
-            //get message from queue
-            string rpmessage;
-            rq.Pop(rpmessage);
-            if (rpmessage == SA)
-            {
-                //if single port tell main process to transport file
-                //main process ready to receive csr file
-                std::thread t4(fileProcess, 0, 0);
-                t4.detach();
-                printf("handleProcess:why can not be here\n");
-                sq.Push(SAR);
+            //if single port tell main process to transport file
+            //main process ready to receive csr file
+            std::thread t4(fileProcess, 0, 0);
+            t4.detach();
+            printf("handleProcess:why can not be here\n");
+            sq.Push(SAR);
 
-                //send sign-ok message
-            }
-            else if (rpmessage == ST)
-            {
-                //receive tls crs file
-                std::thread t4(fileProcess, 0, 1);
-                t4.detach();
-                sq.Push(STR);
-            }
-            else if (rpmessage == GC)
-            {
-                //send certs.tar.gz to client
-                mCert->getAllCerts();
-                std::thread t4(fileProcess, 1, 2);
-                t4.detach();
-                sq.Push(GCR);
-            }
-            else if (rpmessage == GRL)
-            {
-                //send crl to client
-                std::thread t4(fileProcess, 1, 3);
-                t4.detach();
-                sq.Push(GRLR);
-            }
-            else if (rpmessage == RC)
-            {
-                //invoke this client account and tls cert
-                mCert->revokeCert();
-
-            }
-            else
-            {
-                printf("wrong message");
-            }
+            //send sign-ok message
         }
-        else if (!hq.Empty())
+        else if (rpmessage == ST)
         {
-            string hqmessage;
-            hq.Pop(hqmessage);
-            if (hqmessage == GACO)
-            {
-                //sign account certificate
-                mCert->signCert("account");
-                std::thread t4(fileProcess, 1, 0);
-                t4.detach();
-                sq.Push(SAO);
-            }
-            else if (hqmessage == GTCO)
-            {
-                //sign tls certificate
-                mCert->signCert("tls");
-                std::thread t4(fileProcess, 1, 1);
-                t4.detach();
-                sq.Push(STO);
-            }
+            //receive tls crs file
+            std::thread t4(fileProcess, 0, 1);
+            t4.detach();
+            sq.Push(STR);
+        }
+        else if (rpmessage == GC)
+        {
+            //send certs.tar.gz to client
+            mCert->getAllCerts();
+            std::thread t4(fileProcess, 1, 2);
+            t4.detach();
+            sq.Push(GCR);
+        }
+        else if (rpmessage == GRL)
+        {
+            //send crl to client
+            std::thread t4(fileProcess, 1, 3);
+            t4.detach();
+            sq.Push(GRLR);
+        }
+        else if (rpmessage == RC)
+        {
+            //invoke this client account and tls cert
+            mCert->revokeCert();
         }
         else
         {
-            continue;
+            printf("wrong message");
+        }
+    }
+}
+
+/*******
+ * handleHqProcess(): handle message in hq-- receive, and send result to sq -- sendqueue.
+ * */
+void handleHqProcess()
+{
+    printf("start handle handle queue thread\n");
+    while (1)
+    {
+
+        string hqmessage;
+        hq.Pop(hqmessage);
+        if (hqmessage == GACO)
+        {
+            //sign account certificate
+            mCert->signCert("account");
+            std::thread t4(fileProcess, 1, 0);
+            t4.detach();
+            sq.Push(SAO);
+        }
+        else if (hqmessage == GTCO)
+        {
+            //sign tls certificate
+            mCert->signCert("tls");
+            std::thread t4(fileProcess, 1, 1);
+            t4.detach();
+            sq.Push(STO);
         }
     }
 }
@@ -387,10 +403,7 @@ void sendProcess()
     printf("start send thread\n");
     while (1)
     {
-        if (sq.Empty())
-        {
-            continue;
-        }
+
         // char buf[1024];
         // fgets(buf, sizeof(buf), stdin);
         // //printf("you are send %s", buf);
@@ -494,11 +507,16 @@ int main()
     std::thread t2(receiveProcess);
     t2.detach();
 
-    //thread : handle
-    std::thread t3(handleProcess);
+    //thread : handle rq
+    std::thread t3(handleRqProcess);
     t3.detach();
+
+    //thread : handle hq
+    std::thread t4(handleHqProcess);
+    t4.detach();
     while (keepRunning)
     {
+        sleep(1);
     }
     cout << "Terminated by Ctrl+C signal." << endl;
     return 0;

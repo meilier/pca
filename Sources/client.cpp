@@ -133,10 +133,7 @@ void sendProcess()
     printf("start sendProcess thread\n");
     while (1)
     {
-        if (sq.Empty())
-        {
-            continue;
-        }
+
         //get message from send queue
         string sqmessage;
         sq.Pop(sqmessage);
@@ -150,11 +147,7 @@ void handleProcess()
     printf("start handleProcess thread\n");
     while (1)
     {
-        if (rq.Empty())
-        {
-            sleep(1);
-            continue;
-        }
+
         printf("?????why not here\n");
         //get message from queue
         string rpmessage;
@@ -345,6 +338,7 @@ int main()
     sq.Push(RC);
     while (keepRunning)
     {
+        sleep(1);
     }
     close(sock_cli);
     return 0;
