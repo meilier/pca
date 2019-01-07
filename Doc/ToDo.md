@@ -1,8 +1,14 @@
-# bug
+# to do and bug list
 
-## change thread loop to semaphore
+Three below for fast multi-thread exec all the process
 
+## 1⃣️ muli-thread synchronization
 
+## 2⃣️ message split
+
+## 3⃣️ config file for every nodes
+
+## change thread loop to semaphore -done
 
 ## bug1
 
@@ -53,5 +59,3 @@ next, I'll see why sq.Push(SAO) don't work.
                 mCert->signCert("account");
                 sq.Push(SAO);
         249 }
-
-
