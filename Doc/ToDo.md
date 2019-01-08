@@ -6,7 +6,7 @@ Three below for fast multi-thread exec all the process
 
 ## 2⃣️ message split
 
-## 3⃣️ config file for every nodes
+## 3⃣️ config file for every nodes -- done
 
 ## change thread loop to semaphore -done
 
