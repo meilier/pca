@@ -1,4 +1,4 @@
-WORKDIR="/home/weizhengxing/github/pca"
+WORKDIR=$(cd `dirname $0`;cd ..; pwd)
 CONFIG=$WORKDIR/Config/config.cfg
 
 # if config file enable?
@@ -7,8 +7,8 @@ echo "enable config ?" $ENABLECONFIG
 if [ $ENABLECONFIG -eq 0 ]
 then
 # set var to default
-CAPATH="/home/weizhengxing/testecc"
-CLIENTPATH="/home/weizhengxing/client"
+CAPATH="/testecc"
+CLIENTPATH="/client"
 CAPASS=123456
 CLIENTPASS=123456
 COUNTRYNAME=CN

@@ -7,7 +7,7 @@ class ClientCert
     //void operator=(Cert const &);
     ~ClientCert();
     //root path
-    const string CLIENTPATH = "/home/weizhengxing/client/";
+    const string CLIENTPATH = "/client/";
     //first-tier path
     const string nodeCert = CLIENTPATH + "certs/";
     const string nodeRequest = CLIENTPATH + "requests/";
