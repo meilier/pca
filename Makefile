@@ -5,10 +5,10 @@ CLIENTSRCS = $(wildcard ./Sources/client.cpp ./Sources/clientcert.cpp)
 CLIENTOBJS = $(CLIENTSRCS:.c = .o)
 
 
-WORKDIR = /Users/xingweizheng/github/pca
+WORKDIR = /home/weizhengxing/github/pca
 CC = g++
 INCLUDES = -I $(WORKDIR)/Headers
-CCFLAGS = -std=c++11 -g -Wall -O0 
+CCFLAGS = -std=c++11 -pthread -g -Wall -O0 
 OUTPUT = server client
 
 all : server client

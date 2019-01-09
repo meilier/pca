@@ -1,3 +1,3 @@
 using namespace std;
 #include <string>
-#define WORKDIR "/Users/xingweizheng/github/pca"
+#define WORKDIR "/home/weizhengxing/github/pca"

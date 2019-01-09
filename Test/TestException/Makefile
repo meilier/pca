@@ -1,7 +1,7 @@
 SRCS = $(wildcard *.cpp)
 OBJS = $(SRCS:.c = .o)
-WORKDIR = /Users/xingweizheng/github/pca
-CC = clang++
+WORKDIR = $(PWD)
+CC = g++
 INCLUDES = -I $(WORKDIR)/Headers
 CCFLAGS = -std=c++11 -g -AWall -o0
 OUTPUT = test.out

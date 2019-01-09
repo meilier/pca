@@ -8,7 +8,7 @@ private:
   ~Cert();
   int CertSerial = 0;
   //root path
-  const string CAPATH = "/Users/xingweizheng/testecc/";
+  const string CAPATH = "/home/weizhengxing/testecc/";
   const string caCert = CAPATH;
   //first-tier path
   const string nodeCert = CAPATH + "certs/";

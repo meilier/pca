@@ -1,4 +1,4 @@
-#include <sys/types.h>
+#include <signal.h>
 #include <sys/socket.h>
 #include <stdio.h>
 #include <netinet/in.h>
@@ -14,7 +14,6 @@
 #include <thread>
 #include <list>
 #include <map>
-#include <Kernel/netinet/tcp.h>
 #include "cert.hpp"
 #include "cqueue.hpp"
 #include "cmessage.hpp"
@@ -96,7 +95,7 @@ void getConn()
 /*******
  * receiveProcess(): receive messag from client
  * and send it to rq -- receive queue, waiting handleProcess to cope with it
- * ***/
+ * ***/void sig_handler(int sig);
 void receiveProcess()
 {
     struct timeval tv;

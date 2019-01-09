@@ -1,6 +1,6 @@
 SRCS = $(wildcard *.cpp)
 OBJS = $(SRCS:.c = .o)
-WORKDIR = /Users/xingweizheng/github/pca
+WORKDIR = /home/weizhengxing/github/pca
 CC = clang++
 INCLUDES = -I $(WORKDIR)/Headers
 CCFLAGS = -std=c++11 -g -AWall -o0
