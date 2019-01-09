@@ -1,4 +1,5 @@
-WORKDIR="/Users/xingweizheng/github/pca"
+WORKDIR=$(cd `dirname $0`;cd ..; pwd)
+echo "haha is" $WORKDIR
 CONFIG=$WORKDIR/Config/config.cfg
 
 # if config file enable?

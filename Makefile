@@ -4,10 +4,8 @@ SERVEROBJS = $(SERVERSRCS:.c = .o)
 CLIENTSRCS = $(wildcard ./Sources/client.cpp ./Sources/clientcert.cpp)
 CLIENTOBJS = $(CLIENTSRCS:.c = .o)
 
-
-WORKDIR = /Users/xingweizheng/github/pca
 CC = g++
-INCLUDES = -I $(WORKDIR)/Headers
+INCLUDES = -I $(PWD)/Headers
 CCFLAGS = -std=c++11 -g -Wall -O0 
 OUTPUT = server client
 
