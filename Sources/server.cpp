@@ -1,4 +1,3 @@
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <stdio.h>
 #include <netinet/in.h>
@@ -14,7 +13,6 @@
 #include <thread>
 #include <list>
 #include <map>
-#include <Kernel/netinet/tcp.h>
 #include "cert.hpp"
 #include "cqueue.hpp"
 #include "cmessage.hpp"
@@ -106,8 +104,10 @@ void receiveProcess()
     while (1)
     {
         std::list<int>::iterator it;
-        for (it = li.begin(); it != li.end(); ++it)
+        printf("receiveProcess: wait client to send message\n");
+        for (it = li.begin(); it != li.end();)
         {
+            printf("receiveProcess: into for loop\n");
             fd_set rfds;
             FD_ZERO(&rfds);
             int maxfd = 0;
@@ -138,7 +138,10 @@ void receiveProcess()
                     if (errno != EINTR)
                         sema++;
                     std::lock_guard<std::mutex> lock(mtx);
+                    close(*it);
+                    li.erase(it++);
                     cv.notify_one();
+                    continue;
                 }
 
                 if (string(rbuf) == SA.c_str())
@@ -192,6 +195,7 @@ void receiveProcess()
                     printf("wrong message\n");
                 }
             }
+            it++;
         }
         sleep(1);
     }

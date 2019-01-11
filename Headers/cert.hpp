@@ -1,4 +1,5 @@
 #include "common.hpp"
+
 class Cert
 {
 private:

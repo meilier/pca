@@ -1,7 +1,7 @@
-SERVERSRCS = $(wildcard ./Sources/server.cpp ./Sources/cert.cpp)
+SERVERSRCS = $(wildcard ./Sources/server.cpp ./Sources/cert.cpp ./Sources/common.cpp)
 SERVEROBJS = $(SERVERSRCS:.c = .o)
 
-CLIENTSRCS = $(wildcard ./Sources/client.cpp ./Sources/clientcert.cpp)
+CLIENTSRCS = $(wildcard ./Sources/client.cpp ./Sources/clientcert.cpp ./Sources/common.cpp)
 CLIENTOBJS = $(CLIENTSRCS:.c = .o)
 
 CC = g++

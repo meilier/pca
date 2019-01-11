@@ -1,6 +1,7 @@
 #include "cert.hpp"
 #include "common.hpp"
 #include <fstream>
+#include <unistd.h>
 #include <sstream>
 #include <stdio.h>
 using namespace std;
@@ -103,6 +104,15 @@ Cert::Cert()
 {
     printf("Init CA Server\n");
     //call setup.sh
+    char current_absolute_path[512];
+    getcwd(current_absolute_path, 512);
+    //int index = strrchr( current_absolute_path, '/' ) - current_absolute_path;
+    //current_absolute_path[index] = '\0';
+    WORKDIR = string(current_absolute_path);
+    printf("WORKDIR is %s \n",WORKDIR.c_str());
+    //readConfigFile((WORKDIR+"/Config/config.cfg").c_str(),"CAPATH",CAPATH);
+    //printf("CAPATH is %s\n",CAPATH.c_str());
+    //printf("nodeCert is %s\n",nodeCert.c_str());
     string signCmd = "sh " + string(WORKDIR) + "/Scripts/setup.sh";
     //Todo: error handling
     popen(signCmd.c_str(), "w");

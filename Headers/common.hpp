@@ -1,4 +1,8 @@
+#ifndef _COMMON
+#define _COMMON
+
 using namespace std;
 #include <string>
-
-#define WORKDIR "/Users/xingweizheng/github/pca"
+extern string WORKDIR;
+bool readConfigFile(const char *cfgfilepath, const string &key, string &value);
+#endif

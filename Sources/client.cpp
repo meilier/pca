@@ -330,12 +330,12 @@ int main()
     sq.Push(ST);
     sleep(6);
     sq.Push(SA);
-    sleep(6);
-    sq.Push(GC);
-    sleep(6);
-    sq.Push(GRL);
-    sleep(6);
-    sq.Push(RC);
+    //sleep(6);
+    //sq.Push(GC);
+    //sleep(6);
+    //sq.Push(GRL);
+    //sleep(6);
+    //sq.Push(RC);
     while (keepRunning)
     {
         sleep(1);
