@@ -1,3 +1,6 @@
+#ifdef __linux__
+    #include <cstdlib>
+#endif
 #include <iostream>
 using namespace std;
 

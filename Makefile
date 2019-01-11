@@ -6,7 +6,7 @@ CLIENTOBJS = $(CLIENTSRCS:.c = .o)
 
 CC = g++
 INCLUDES = -I $(PWD)/Headers
-CCFLAGS = -std=c++11 -g -Wall -O0 
+CCFLAGS = -std=c++11 -pthread -g -Wall -O0 
 OUTPUT = server client
 
 all : server client
