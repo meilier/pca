@@ -25,8 +25,14 @@
 #define IP "127.0.0.1"
 #define MAXLINE 4096
 
+typedef struct
+{
+    int conn;
+    string message;
+} CInstance;
+
 void getConn();
-void fileProcess(int transType, int certType);
+void fileProcess(int transType, int certType, int conn);
 void receiveProcess();
 void handleRqProcess();
 void handleHqProcess();
@@ -41,18 +47,19 @@ struct sockaddr_in servaddr;
 struct sockaddr_in fileaddr;
 socklen_t len;
 socklen_t filelen;
+
 std::list<int> li;
 Cert *mCert;
 map<string, string> qqq;
 
 //recv message queue
-ConcurrentQueue<string> rq;
+ConcurrentQueue<CInstance> rq;
 
 //send message queue
-ConcurrentQueue<string> sq;
+ConcurrentQueue<CInstance> sq;
 
 //handle message queue
-ConcurrentQueue<string> hq;
+ConcurrentQueue<CInstance> hq;
 
 // ctrl + c interupt
 static volatile int keepRunning = 1;
@@ -134,6 +141,9 @@ void receiveProcess()
             else
             {
                 char rbuf[1024];
+                CInstance mCInstance;
+                mCInstance.conn = *it;
+                printf("receiveProcess: mCInstance conn is %d\n",*it);
                 memset(rbuf, 0, sizeof(rbuf));
                 int len = recv(*it, rbuf, sizeof(rbuf), 0);
                 printf("reveiceProcess: the message is %s\n", rbuf);
@@ -153,7 +163,7 @@ void receiveProcess()
                 {
                     //do get account csr file and sign and return pem
                     printf("start to sign account cert\n");
-
+                    mCInstance.message = SA;
                     //new thread to write file , sign , send done message , send pem file
                     //first prepare a listenning socket and accept, then send ok message to
                     //client for it to send csrfile, when file is complete , start to sign
@@ -162,38 +172,42 @@ void receiveProcess()
                     // char sbuf[1024];
                     // strcpy(sbuf,"ready-sign-account");
                     // int len = send(*it, sbuf, sizeof(sbuf), 0);
-                    rq.Push(SA);
+                    rq.Push(mCInstance);
                 }
                 else if (string(rbuf) == ST.c_str())
                 {
                     //do get tls csr file and sign and return pem
                     printf("rbuf is fule %s\n", rbuf);
                     printf("start to sign tls cert\n");
+                    mCInstance.message = ST;
                     // char sbuf[1024];
                     // strcpy(sbuf,"ready-sign-tls");
                     // int len = send(*it, sbuf, sizeof(sbuf), 0);
-                    rq.Push(ST);
+                    rq.Push(mCInstance);
                 }
                 else if (string(rbuf) == GC.c_str())
                 {
                     // transport all pem files
                     printf("start to transport pem files to nodes\n");
+                    mCInstance.message = ST;
                     // mCert->getAllCerts();
-                    rq.Push(GC);
+                    rq.Push(mCInstance);
                 }
                 else if (string(rbuf) == GRL.c_str())
                 {
                     // transport all pem files
                     printf("start to transport cert revocation list file to nodes\n");
+                    mCInstance.message = GRL;
                     // mCert->getAllCerts();
-                    rq.Push(GRL);
+                    rq.Push(mCInstance);
                 }
                 else if (string(rbuf) == RC.c_str())
                 {
                     // transport all pem files
                     printf("start to transport pem files to nodes\n");
+                    mCInstance.message = RC;
                     // mCert->revokeCert();
-                    rq.Push(RC);
+                    rq.Push(mCInstance);
                 }
                 else
                 {
@@ -216,42 +230,48 @@ void handleRqProcess()
     {
 
         //get message from queue
-        string rpmessage;
+        CInstance rpmessage;
+        CInstance sqmessage;
         rq.Pop(rpmessage);
-        if (rpmessage == SA)
+        sqmessage.conn = rpmessage.conn;
+        if (rpmessage.message == SA)
         {
             //if single port tell main process to transport file
             //main process ready to receive csr file
-            std::thread t4(fileProcess, 0, 0);
+            std::thread t4(fileProcess, 0, 0, rpmessage.conn);
             t4.detach();
             printf("handleProcess:why can not be here\n");
-            sq.Push(SAR);
+            sqmessage.message = SAR;
+            sq.Push(sqmessage);
 
             //send sign-ok message
         }
-        else if (rpmessage == ST)
+        else if (rpmessage.message == ST)
         {
             //receive tls crs file
-            std::thread t4(fileProcess, 0, 1);
+            std::thread t4(fileProcess, 0, 1, rpmessage.conn);
             t4.detach();
-            sq.Push(STR);
+            sqmessage.message = STR;
+            sq.Push(sqmessage);
         }
-        else if (rpmessage == GC)
+        else if (rpmessage.message == GC)
         {
             //send certs.tar.gz to client
             mCert->getAllCerts();
-            std::thread t4(fileProcess, 1, 2);
+            std::thread t4(fileProcess, 1, 2, rpmessage.conn);
             t4.detach();
-            sq.Push(GCR);
+            sqmessage.message = GCR;
+            sq.Push(sqmessage);
         }
-        else if (rpmessage == GRL)
+        else if (rpmessage.message == GRL)
         {
             //send crl to client
-            std::thread t4(fileProcess, 1, 3);
+            std::thread t4(fileProcess, 1, 3, rpmessage.conn);
             t4.detach();
-            sq.Push(GRLR);
+            sqmessage.message = GRLR;
+            sq.Push(sqmessage);
         }
-        else if (rpmessage == RC)
+        else if (rpmessage.message == RC)
         {
             //invoke this client account and tls cert
             mCert->revokeCert();
@@ -272,23 +292,27 @@ void handleHqProcess()
     while (1)
     {
 
-        string hqmessage;
+        CInstance hqmessage;
+        CInstance sqmessage;
         hq.Pop(hqmessage);
-        if (hqmessage == GACO)
+        sqmessage.conn = hqmessage.conn;
+        if (hqmessage.message == GACO)
         {
             //sign account certificate
             mCert->signCert("account");
-            std::thread t4(fileProcess, 1, 0);
+            std::thread t4(fileProcess, 1, 0, hqmessage.conn);
             t4.detach();
-            sq.Push(SAO);
+            sqmessage.message = SAO;
+            sq.Push(sqmessage);
         }
-        else if (hqmessage == GTCO)
+        else if (hqmessage.message == GTCO)
         {
             //sign tls certificate
             mCert->signCert("tls");
-            std::thread t4(fileProcess, 1, 1);
+            std::thread t4(fileProcess, 1, 1, hqmessage.conn);
             t4.detach();
-            sq.Push(STO);
+            sqmessage.message = GTCO;
+            sq.Push(sqmessage);
         }
     }
 }
@@ -297,7 +321,7 @@ void handleHqProcess()
  * transType: 0 get file from client . certType: 0 get account csr, 1 get tls csr
  * transType: 1 send file to client. certType: 1 send file to client, 0 send account pem, 1 send tls pem , 2 send certs.tar.gz to client, 3 send crl file to client
  * */
-void fileProcess(int transType, int certType)
+void fileProcess(int transType, int certType, int conn)
 {
 
     printf("======waiting for client's request======\n");
@@ -309,6 +333,8 @@ void fileProcess(int transType, int certType)
             int connfd = 0;
             int byteNum;
             char buff[MAXLINE];
+            CInstance hqmessage;
+            hqmessage.conn = conn;
             printf("fileProcess: start file transfer listening at 7001\n");
             if ((connfd = accept(fileSock, (struct sockaddr *)&fileaddr, &filelen)) == -1)
             {
@@ -335,7 +361,16 @@ void fileProcess(int transType, int certType)
                     close(connfd);
                     csrfile.close();
                     //send file get ok message to handle process
-                    certType == 0 ? hq.Push(GACO) : hq.Push(GTCO);
+                    if (certType == 0)
+                    {
+                        hqmessage.message = GACO;
+                        hq.Push(hqmessage);
+                    }
+                    else
+                    {
+                        hqmessage.message = GTCO;
+                        hq.Push(hqmessage);
+                    }
                     printf("should be ready to return\n");
                     return;
                 }
@@ -422,41 +457,42 @@ void sendProcess()
         // for(it=li.begin(); it!=li.end(); ++it){
         //     send(*it, buf, sizeof(buf), 0);
         // }
-        string sqmessage;
+        CInstance sqmessage;
         sq.Pop(sqmessage);
-        printf("sendProcess: get message %s\n", sqmessage.c_str());
-        std::list<int>::iterator it;
-        it = li.begin();
-        if (sqmessage == SAR)
+        printf("sendProcess: conn is %d get message %s\n", sqmessage.conn, sqmessage.message.c_str());
+        // std::list<int>::iterator it;
+        // it = li.begin();
+        int connfd = sqmessage.conn;
+        if (sqmessage.message == SAR)
         {
             //get csr file
             const char *c_s = SAR.c_str();
             char ff[11];
             printf("sendProcess:whyaaaaaaaa %s  %d  %d %d %d \n", SAR.c_str(), sizeof(*SAR.c_str()), sizeof(c_s), sizeof("ssssssssss"), sizeof(ff));
-            send(*it, SAR.c_str(), SAR.length(), 0);
+            send(connfd, SAR.c_str(), SAR.length(), 0);
         }
-        else if (sqmessage == SAO)
+        else if (sqmessage.message == SAO)
         {
             //ready to tranport pem to client
-            send(*it, SAO.c_str(), SAO.length(), 0);
+            send(connfd, SAO.c_str(), SAO.length(), 0);
         }
-        else if (sqmessage == STR)
+        else if (sqmessage.message == STR)
         {
             //get csr file
-            send(*it, STR.c_str(), STR.length(), 0);
+            send(connfd, STR.c_str(), STR.length(), 0);
         }
-        else if (sqmessage == STO)
+        else if (sqmessage.message == STO)
         {
             //ready to tranport pem to client
-            send(*it, STO.c_str(), STO.length(), 0);
+            send(connfd, STO.c_str(), STO.length(), 0);
         }
-        else if (sqmessage == GCR)
+        else if (sqmessage.message == GCR)
         {
-            send(*it, GCR.c_str(), GCR.length(), 0);
+            send(connfd, GCR.c_str(), GCR.length(), 0);
         }
-        else if (sqmessage == GRLR)
+        else if (sqmessage.message == GRLR)
         {
-            send(*it, GRLR.c_str(), GRLR.length(), 0);
+            send(connfd, GRLR.c_str(), GRLR.length(), 0);
         }
         else
         {
