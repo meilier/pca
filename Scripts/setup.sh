@@ -1,6 +1,6 @@
 # setup dir
 ScirptPath=$(cd `dirname $0`; pwd)
-echo $ScirptPaths
+echo $ScirptPath
 source $ScirptPath/header.sh
 mkdir -p $CAPATH
 cp $WORKDIR/Scripts/openssl.cnf $CAPATH/
