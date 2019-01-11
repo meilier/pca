@@ -40,7 +40,7 @@ void sendProcess();
 void sig_handler(int sig);
 
 // for easy mode ,we use single process
-int sema = 1;
+//int sema = 1;
 int messageSock;
 int fileSock;
 struct sockaddr_in servaddr;
@@ -82,23 +82,23 @@ void getConn()
     {
         //here we may tell the other client that some client is connecting
         printf("waiting for client\n");
-        if (sema > 0)
-        {
-            printf("start message listening thread at 7000\n");
-            int conn = accept(messageSock, (struct sockaddr *)&servaddr, &len);
-            li.push_back(conn);
-            for (list<int>::iterator it = li.begin(); it != li.end(); ++it)
-                cout << ' ' << *it << endl;
-            printf("getConn: the connect fd is %d\n", conn);
-            sema--;
-            mCert->increaseSerial();
-        }
-        std::unique_lock<std::mutex> lock(mtx);
-        while (sema <= 0)
-        {
-            printf("blocking for client\n");
-            cv.wait(lock);
-        }
+        //if (sema > 0)
+        //{
+        printf("start message listening thread at 7000\n");
+        int conn = accept(messageSock, (struct sockaddr *)&servaddr, &len);
+        li.push_back(conn);
+        for (list<int>::iterator it = li.begin(); it != li.end(); ++it)
+            cout << ' ' << *it << endl;
+        printf("getConn: the connect fd is %d\n", conn);
+        //sema--;
+        mCert->increaseSerial();
+        //}
+        // std::unique_lock<std::mutex> lock(mtx);
+        // while (sema <= 0)
+        // {
+        //     printf("blocking for client\n");
+        //     cv.wait(lock);
+        // }
         //printf("still loop\n");
     }
 }
@@ -143,7 +143,7 @@ void receiveProcess()
                 char rbuf[1024];
                 CInstance mCInstance;
                 mCInstance.conn = *it;
-                printf("receiveProcess: mCInstance conn is %d\n",*it);
+                printf("receiveProcess: mCInstance conn is %d\n", *it);
                 memset(rbuf, 0, sizeof(rbuf));
                 int len = recv(*it, rbuf, sizeof(rbuf), 0);
                 printf("reveiceProcess: the message is %s\n", rbuf);
@@ -151,12 +151,14 @@ void receiveProcess()
                 if (len == 0)
                 {
                     if (errno != EINTR)
-                        sema++;
-                    std::lock_guard<std::mutex> lock(mtx);
-                    close(*it);
-                    li.erase(it++);
-                    cv.notify_one();
-                    continue;
+                    {
+                        //    sema++;
+                        //std::lock_guard<std::mutex> lock(mtx);
+                        close(*it);
+                        li.erase(it++);
+                        //cv.notify_one();
+                        continue;
+                    }
                 }
 
                 if (string(rbuf) == SA.c_str())
