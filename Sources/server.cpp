@@ -74,6 +74,7 @@ void getConn()
     while (1)
     {
         //here we may tell the other client that some client is connecting
+        printf("waiting for client\n");
         if (sema > 0)
         {
             printf("start message listening thread at 7000\n");
@@ -88,6 +89,7 @@ void getConn()
         std::unique_lock<std::mutex> lock(mtx);
         while (sema <= 0)
         {
+            printf("blocking for client\n");
             cv.wait(lock);
         }
         //printf("still loop\n");
@@ -165,7 +167,7 @@ void receiveProcess()
                 else if (string(rbuf) == ST.c_str())
                 {
                     //do get tls csr file and sign and return pem
-                    printf("rbuf is fule %s", rbuf);
+                    printf("rbuf is fule %s\n", rbuf);
                     printf("start to sign tls cert\n");
                     // char sbuf[1024];
                     // strcpy(sbuf,"ready-sign-tls");

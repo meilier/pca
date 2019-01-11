@@ -311,8 +311,10 @@ int main()
     servaddr.sin_addr.s_addr = inet_addr("127.0.0.1"); ///服务器ip
 
     //连接服务器，成功返回0，错误返回-1
+    printf("ready to connect to server \n");
     if (connect(sock_cli, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0)
     {
+        printf("connect to server failed\n");
         perror("connect");
         exit(1);
     }
