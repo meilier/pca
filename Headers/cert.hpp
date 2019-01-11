@@ -1,5 +1,5 @@
 #include "common.hpp"
-
+#include <map>
 class Cert
 {
 private:
@@ -7,7 +7,8 @@ private:
   //Cert(Cert const &);
   //void operator=(Cert const &);
   ~Cert();
-  int CertSerial = 0;
+  int serial;
+  map<int, int> CertSerial;
   //root path
   const string CAPATH = "/Users/xingweizheng/testecc/";
   const string caCert = CAPATH;
@@ -38,9 +39,12 @@ public:
     return theSingleton;
   }
   void increaseSerial();
-  void signCert(string certType);
+  int getSerial();
+  void insertSerial(int conn, int serial);
+  void deleteSerial(int conn);
+  void signCert(int conn,string certType);
   void getAllCerts();
-  void revokeCert();
+  void revokeCert(int conn);
 
-  string getCertFileName(string fileType, string useType = "");
+  string getCertFileName(int conn, string fileType, string useType = "");
 };

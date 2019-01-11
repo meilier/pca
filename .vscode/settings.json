@@ -20,6 +20,7 @@
         "thread": "cpp",
         "ostream": "cpp",
         "type_traits": "cpp",
-        "__mutex_base": "cpp"
+        "__mutex_base": "cpp",
+        "map": "cpp"
     }
 }

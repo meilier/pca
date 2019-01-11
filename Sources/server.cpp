@@ -92,6 +92,7 @@ void getConn()
         printf("getConn: the connect fd is %d\n", conn);
         //sema--;
         mCert->increaseSerial();
+        mCert->insertSerial(conn,mCert->getSerial());
         //}
         // std::unique_lock<std::mutex> lock(mtx);
         // while (sema <= 0)
@@ -156,6 +157,7 @@ void receiveProcess()
                         //std::lock_guard<std::mutex> lock(mtx);
                         close(*it);
                         li.erase(it++);
+                        mCert->deleteSerial(*it);
                         //cv.notify_one();
                         continue;
                     }
@@ -276,7 +278,7 @@ void handleRqProcess()
         else if (rpmessage.message == RC)
         {
             //invoke this client account and tls cert
-            mCert->revokeCert();
+            mCert->revokeCert(sqmessage.conn);
         }
         else
         {
@@ -301,7 +303,7 @@ void handleHqProcess()
         if (hqmessage.message == GACO)
         {
             //sign account certificate
-            mCert->signCert("account");
+            mCert->signCert(sqmessage.conn,"account");
             std::thread t4(fileProcess, 1, 0, hqmessage.conn);
             t4.detach();
             sqmessage.message = SAO;
@@ -310,7 +312,7 @@ void handleHqProcess()
         else if (hqmessage.message == GTCO)
         {
             //sign tls certificate
-            mCert->signCert("tls");
+            mCert->signCert(sqmessage.conn,"tls");
             std::thread t4(fileProcess, 1, 1, hqmessage.conn);
             t4.detach();
             sqmessage.message = STO;
@@ -348,11 +350,11 @@ void fileProcess(int transType, int certType, int conn)
             std::ofstream csrfile;
             if (certType == 0)
             {
-                csrfile.open(mCert->getCertFileName("csr", "account"), std::ios::out | std::ios::trunc);
+                csrfile.open(mCert->getCertFileName(conn, "csr", "account"), std::ios::out | std::ios::trunc);
             }
             else
             {
-                csrfile.open(mCert->getCertFileName("csr", "tls"), std::ios::out | std::ios::trunc);
+                csrfile.open(mCert->getCertFileName(conn, "csr", "tls"), std::ios::out | std::ios::trunc);
             }
             while (1)
             {
@@ -407,22 +409,22 @@ void fileProcess(int transType, int certType, int conn)
             if (certType == 0)
             {
                 //open account pem file
-                sfile.open(mCert->getCertFileName("pem", "account"), ios::out | ios::in);
+                sfile.open(mCert->getCertFileName(conn,"pem", "account"), ios::out | ios::in);
             }
             else if (certType == 1)
             {
                 //open tls pem file
-                sfile.open(mCert->getCertFileName("pem", "tls"), ios::out | ios::in);
+                sfile.open(mCert->getCertFileName(conn,"pem", "tls"), ios::out | ios::in);
             }
             else if (certType == 2)
             {
                 //open tar.gz file
-                sfile.open(mCert->getCertFileName("compact"), ios::out | ios::in);
+                sfile.open(mCert->getCertFileName(conn,"compact"), ios::out | ios::in);
             }
             else if (certType == 3)
             {
                 //open csrfile file
-                sfile.open(mCert->getCertFileName("crl"), ios::out | ios::in);
+                sfile.open(mCert->getCertFileName(conn,"crl"), ios::out | ios::in);
             }
             while (!sfile.eof())
             {
