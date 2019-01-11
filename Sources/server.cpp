@@ -311,7 +311,7 @@ void handleHqProcess()
             mCert->signCert("tls");
             std::thread t4(fileProcess, 1, 1, hqmessage.conn);
             t4.detach();
-            sqmessage.message = GTCO;
+            sqmessage.message = STO;
             sq.Push(sqmessage);
         }
     }
