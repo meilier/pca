@@ -2,7 +2,7 @@
 default_ca = ca_root
 
 [ ca_root ]
-dir               = /Users/xingweizheng/testecc
+dir               = /Users/xingweizheng/testrsa
 certs             = $dir/certs
 crl_dir           = $dir/crl
 new_certs_dir     = $dir/newcerts

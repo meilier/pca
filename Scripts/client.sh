@@ -7,9 +7,9 @@ mkdir -p $CLIENTPATH/certs/account $CLIENTPATH/certs/tls
 mkdir -p $CLIENTPATH/requests/account $CLIENTPATH/requests/tls
 mkdir -p $CLIENTPATH/crl
 echo "set directory done"
-openssl ecparam -name secp384r1 -genkey | openssl ec -aes-256-cbc -passout pass:$CLIENTPASS -out $CLIENTPATH/certs/account/account.key.pem
+openssl genrsa -aes256 -passout pass:$CLIENTPASS -out $CLIENTPATH/certs/account/account.key.pem 2048
 chmod 400 $CLIENTPATH/certs/account/account.key.pem
-openssl ecparam -name secp384r1 -genkey | openssl ec -aes-256-cbc -passout pass:$CLIENTPASS -out $CLIENTPATH/certs/tls/tls.key.pem
+openssl genrsa -aes256 -passout pass:$CLIENTPASS -out $CLIENTPATH/certs/tls/tls.key.pem 2048
 chmod 400 $CLIENTPATH/certs/tls/tls.key.pem
 echo "generate client account and tls key done"
 
