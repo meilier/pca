@@ -21,6 +21,9 @@
         "ostream": "cpp",
         "type_traits": "cpp",
         "__mutex_base": "cpp",
-        "map": "cpp"
+        "map": "cpp",
+        "vector": "cpp",
+        "__bit_reference": "cpp",
+        "iterator": "cpp"
     }
 }

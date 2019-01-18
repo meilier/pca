@@ -92,38 +92,44 @@ void receiveProcess()
             printf("receiveProcess: receive len is %d \n", len);
             // message branch
             printf("reveiveProcess get message is %s\n", recvbuf);
-            if (string(recvbuf) == SAR)
+            vector<string> ms = messageSplit(recvbuf);
+            for (auto it = ms.begin(); it != ms.end(); it++)
             {
-                //connect to server file transfer port, such as, 7001
-                rq.Push(SAR);
-            }
-            else if (string(recvbuf) == SAO)
-            {
-                //
-                rq.Push(SAO);
-            }
-            else if (string(recvbuf) == STR)
-            {
-                rq.Push(STR);
-            }
-            else if (string(recvbuf) == STO)
-            {
-                printf("Sign tls ok here\n");
-                rq.Push(STO);
-                rq.Empty() ? printf("yes") : printf("no");
-                printf("Sign tls ok here?\n");
-            }
-            else if (string(recvbuf) == GCR)
-            {
-                //get certs ready message from server
-                //connect to server to get it's certs.tar.gz
-                rq.Push(GCR);
-            }
-            else if (string(recvbuf) == GRLR)
-            {
-                //get certs ready message from server
-                //connect to server to get it's certs.tar.gz
-                rq.Push(GRLR);
+                cout << *it << endl;
+
+                if (string(*it) == SAR)
+                {
+                    //connect to server file transfer port, such as, 7001
+                    rq.Push(SAR);
+                }
+                else if (string(*it) == SAO)
+                {
+                    //
+                    rq.Push(SAO);
+                }
+                else if (string(*it) == STR)
+                {
+                    rq.Push(STR);
+                }
+                else if (string(*it) == STO)
+                {
+                    printf("Sign tls ok here\n");
+                    rq.Push(STO);
+                    rq.Empty() ? printf("yes") : printf("no");
+                    printf("Sign tls ok here?\n");
+                }
+                else if (string(*it) == GCR)
+                {
+                    //get certs ready message from server
+                    //connect to server to get it's certs.tar.gz
+                    rq.Push(GCR);
+                }
+                else if (string(*it) == GRLR)
+                {
+                    //get certs ready message from server
+                    //connect to server to get it's certs.tar.gz
+                    rq.Push(GRLR);
+                }
             }
             memset(recvbuf, 0, sizeof(recvbuf));
         }
@@ -331,8 +337,9 @@ int main()
     t3.detach();
 
     //test Sign Account
-    sq.Push(ST);
     sleep(6);
+    sq.Push(ST);
+    sleep(5);
     sq.Push(SA);
     //sleep(6);
     //sq.Push(GC);

@@ -92,7 +92,7 @@ void getConn()
         printf("getConn: the connect fd is %d\n", conn);
         //sema--;
         mCert->increaseSerial();
-        mCert->insertSerial(conn,mCert->getSerial());
+        mCert->insertSerial(conn, mCert->getSerial());
         //}
         // std::unique_lock<std::mutex> lock(mtx);
         // while (sema <= 0)
@@ -162,60 +162,65 @@ void receiveProcess()
                         continue;
                     }
                 }
+                vector<string> ms = messageSplit(rbuf);
+                for (auto it = ms.begin(); it != ms.end(); it++)
+                {
+                    cout << *it << endl;
 
-                if (string(rbuf) == SA.c_str())
-                {
-                    //do get account csr file and sign and return pem
-                    printf("start to sign account cert\n");
-                    mCInstance.message = SA;
-                    //new thread to write file , sign , send done message , send pem file
-                    //first prepare a listenning socket and accept, then send ok message to
-                    //client for it to send csrfile, when file is complete , start to sign
-                    // when sign process is ok, send sign-ok message to client, client start
-                    // to listen at a new socket for server to transport file
-                    // char sbuf[1024];
-                    // strcpy(sbuf,"ready-sign-account");
-                    // int len = send(*it, sbuf, sizeof(sbuf), 0);
-                    rq.Push(mCInstance);
-                }
-                else if (string(rbuf) == ST.c_str())
-                {
-                    //do get tls csr file and sign and return pem
-                    printf("rbuf is fule %s\n", rbuf);
-                    printf("start to sign tls cert\n");
-                    mCInstance.message = ST;
-                    // char sbuf[1024];
-                    // strcpy(sbuf,"ready-sign-tls");
-                    // int len = send(*it, sbuf, sizeof(sbuf), 0);
-                    rq.Push(mCInstance);
-                }
-                else if (string(rbuf) == GC.c_str())
-                {
-                    // transport all pem files
-                    printf("start to transport pem files to nodes\n");
-                    mCInstance.message = ST;
-                    // mCert->getAllCerts();
-                    rq.Push(mCInstance);
-                }
-                else if (string(rbuf) == GRL.c_str())
-                {
-                    // transport all pem files
-                    printf("start to transport cert revocation list file to nodes\n");
-                    mCInstance.message = GRL;
-                    // mCert->getAllCerts();
-                    rq.Push(mCInstance);
-                }
-                else if (string(rbuf) == RC.c_str())
-                {
-                    // transport all pem files
-                    printf("start to transport pem files to nodes\n");
-                    mCInstance.message = RC;
-                    // mCert->revokeCert();
-                    rq.Push(mCInstance);
-                }
-                else
-                {
-                    printf("wrong message\n");
+                    if (string(*it) == SA.c_str())
+                    {
+                        //do get account csr file and sign and return pem
+                        printf("start to sign account cert\n");
+                        mCInstance.message = SA;
+                        //new thread to write file , sign , send done message , send pem file
+                        //first prepare a listenning socket and accept, then send ok message to
+                        //client for it to send csrfile, when file is complete , start to sign
+                        // when sign process is ok, send sign-ok message to client, client start
+                        // to listen at a new socket for server to transport file
+                        // char sbuf[1024];
+                        // strcpy(sbuf,"ready-sign-account");
+                        // int len = send(*it, sbuf, sizeof(sbuf), 0);
+                        rq.Push(mCInstance);
+                    }
+                    else if (string(*it) == ST.c_str())
+                    {
+                        //do get tls csr file and sign and return pem
+                        printf("rbuf is fule %s\n", rbuf);
+                        printf("start to sign tls cert\n");
+                        mCInstance.message = ST;
+                        // char sbuf[1024];
+                        // strcpy(sbuf,"ready-sign-tls");
+                        // int len = send(*it, sbuf, sizeof(sbuf), 0);
+                        rq.Push(mCInstance);
+                    }
+                    else if (string(*it) == GC.c_str())
+                    {
+                        // transport all pem files
+                        printf("start to transport pem files to nodes\n");
+                        mCInstance.message = ST;
+                        // mCert->getAllCerts();
+                        rq.Push(mCInstance);
+                    }
+                    else if (string(*it) == GRL.c_str())
+                    {
+                        // transport all pem files
+                        printf("start to transport cert revocation list file to nodes\n");
+                        mCInstance.message = GRL;
+                        // mCert->getAllCerts();
+                        rq.Push(mCInstance);
+                    }
+                    else if (string(*it) == RC.c_str())
+                    {
+                        // transport all pem files
+                        printf("start to transport pem files to nodes\n");
+                        mCInstance.message = RC;
+                        // mCert->revokeCert();
+                        rq.Push(mCInstance);
+                    }
+                    else
+                    {
+                        printf("wrong message\n");
+                    }
                 }
             }
             it++;
@@ -303,7 +308,7 @@ void handleHqProcess()
         if (hqmessage.message == GACO)
         {
             //sign account certificate
-            mCert->signCert(sqmessage.conn,"account");
+            mCert->signCert(sqmessage.conn, "account");
             std::thread t4(fileProcess, 1, 0, hqmessage.conn);
             t4.detach();
             sqmessage.message = SAO;
@@ -312,7 +317,7 @@ void handleHqProcess()
         else if (hqmessage.message == GTCO)
         {
             //sign tls certificate
-            mCert->signCert(sqmessage.conn,"tls");
+            mCert->signCert(sqmessage.conn, "tls");
             std::thread t4(fileProcess, 1, 1, hqmessage.conn);
             t4.detach();
             sqmessage.message = STO;
@@ -409,22 +414,22 @@ void fileProcess(int transType, int certType, int conn)
             if (certType == 0)
             {
                 //open account pem file
-                sfile.open(mCert->getCertFileName(conn,"pem", "account"), ios::out | ios::in);
+                sfile.open(mCert->getCertFileName(conn, "pem", "account"), ios::out | ios::in);
             }
             else if (certType == 1)
             {
                 //open tls pem file
-                sfile.open(mCert->getCertFileName(conn,"pem", "tls"), ios::out | ios::in);
+                sfile.open(mCert->getCertFileName(conn, "pem", "tls"), ios::out | ios::in);
             }
             else if (certType == 2)
             {
                 //open tar.gz file
-                sfile.open(mCert->getCertFileName(conn,"compact"), ios::out | ios::in);
+                sfile.open(mCert->getCertFileName(conn, "compact"), ios::out | ios::in);
             }
             else if (certType == 3)
             {
                 //open csrfile file
-                sfile.open(mCert->getCertFileName(conn,"crl"), ios::out | ios::in);
+                sfile.open(mCert->getCertFileName(conn, "crl"), ios::out | ios::in);
             }
             while (!sfile.eof())
             {

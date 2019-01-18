@@ -1,10 +1,49 @@
 # to do and bug list
 
+
+## 2019/01/18
+
+Signature ok
+Certificate Details:
+        Serial Number: 0 (0x0)
+        Validity
+            Not Before: Certificate Details:
+Jan 18 10:00:31 2019 GMT        Serial Number:
+            Not After :  0 (0x0)
+        Validity
+Jan 15 10:00:31 2029 GMT            Not Before:
+Jan 18 10:00:31 2019 GMT        Subject:
+
+            Not After :  Jan 15 10:00:31 2029 GMT
+         Subject:
+                    countryName  countryName                            =  = CNC
+N
+                      stateOrProvinceName   stateOrProvinceName         =  Z H = EJZIHAENJGI
+ A N  G
+             organizationName              organizationName   =  Z J U
+          =   Z J U
+    organizationalUnitName    = ZJUCSCA
+                      organizationalUnitName commonName     =  Z J U C S C A
+           =  A C C O U N TcommonName1
+          Certificate is to be certified until      = TLS1
+Certificate is to be certified until Jan 15 10:00:31 2029 GMTJan 15 10:00:31 2029 GMT (3650 days) (3650 days)
+
+
+Write out database with 1 new entries
+
+Write out database with 1 new entries
+Data Base Updated
+**unable to rename /Users/xingweizheng/testrsa/serial.new to /Users/xingweizheng/testrsa/serial**
+reason: No such file or directory
+receiveProcess: wait client to send message
+
+**bold sentence for handle double sign process at the same time, so it needs to add a lock to run sign cmd.**
+
 Three below for fast multi-thread exec all the process
 
-## 1⃣️ muli-thread synchronization
+## 1⃣️ muli-thread synchronization -- done
 
-## 2⃣️ message split
+## 2⃣️ message split -- done
 
 ## 3⃣️ config file for every nodes -- done
 
