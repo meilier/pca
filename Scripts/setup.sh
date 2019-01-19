@@ -21,6 +21,8 @@ openssl genrsa -aes256  -passout pass:$CAPASS -out $CAPATH/private/cakey.pem 204
 chmod 400 $CAPATH/private/cakey.pem
 openssl req -config $CAPATH/openssl.cnf -key $CAPATH/private/cakey.pem -new -extensions ext_root -out $CAPATH/private/cacert.pem -x509 -passin pass:$CAPASS -subj /C=$COUNTRYNAME/ST=$STATEPROVINCENAME/O=$ORGNAME/OU=$ORGUNITNAME/CN=$COMMONNAMECA -days 7300
 chmod 444 $CAPATH/private/cacert.pem
+# copy ca certs to certs dir
+cp $CAPATH/private/cacert.pem $CAPATH/certs/cacert.pem
 echo "generate ca file ok"
 
 # done 
