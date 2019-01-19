@@ -1,7 +1,7 @@
 # to do and bug list
 
 
-## 2019/01/18
+## 2019/01/18 ----- done sign cmd mutex
 
 Signature ok
 Certificate Details:

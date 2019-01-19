@@ -6,17 +6,53 @@
 #include <stdio.h>
 using namespace std;
 
+int flag = 1;
+
+mutex mtx;
+condition_variable cv;
+
+mutex fmtx;
+
 /* **********
  * Call openssl ca command to sign the crs file the client requests.
  */
 void Cert::signCert(int conn, string certType)
 {
+    FILE *stream;
+    char result[4096];
     //call openssl command to sign
     printf("start to sign cert\n");
     string signCmd = "openssl ca -config " + configPath + " -in " + getCertFileName(conn, "csr", certType) + " -out " + getCertFileName(conn, "pem", certType) + " -batch -key 123456";
+    //string signCmd = "python /Users/xingweizheng/Demo1.py";
     printf("this command is %s\n", signCmd.c_str());
-    //Todo: error handling
-    popen(signCmd.c_str(), "w");
+    //Todo: error handling, lock for single signing
+    std::unique_lock<std::mutex> lock(mtx);
+    fmtx.lock();
+    while (flag == 0)
+    {
+        fmtx.unlock();
+        cv.wait(lock);
+    }
+    fmtx.unlock();
+    lock.unlock();
+    fmtx.lock();
+    flag--;
+    fmtx.unlock();
+    if ((stream = popen(signCmd.c_str(), "r")) != NULL)
+    {
+        printf("stream is not NULL\n",stream);
+        fread(result,sizeof(char),sizeof(result),stream);
+    }
+    pclose(stream);
+    string rs(result);
+    printf("The result is %s\n",rs.c_str());
+    std::unique_lock<std::mutex> lock2(mtx);
+    cv.notify_one();
+    fmtx.lock();
+    flag++;
+    fmtx.unlock();
+    //printf("ready for exit test\n");
+    //exit(1);
     printf("sign cert ok\n");
 }
 

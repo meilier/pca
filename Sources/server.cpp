@@ -65,8 +65,8 @@ ConcurrentQueue<CInstance> hq;
 static volatile int keepRunning = 1;
 
 //getConn mutex condition_variable for non-loop
-mutex mtx;
-condition_variable cv;
+//mutex mtx;
+//condition_variable cv;
 
 void sig_handler(int sig)
 {

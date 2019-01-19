@@ -339,7 +339,7 @@ int main()
     //test Sign Account
     sleep(6);
     sq.Push(ST);
-    sleep(5);
+    //sleep(5);
     sq.Push(SA);
     //sleep(6);
     //sq.Push(GC);
