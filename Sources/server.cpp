@@ -197,7 +197,7 @@ void receiveProcess()
                     {
                         // transport all pem files
                         printf("start to transport pem files to nodes\n");
-                        mCInstance.message = ST;
+                        mCInstance.message = GC;
                         // mCert->getAllCerts();
                         rq.Push(mCInstance);
                     }

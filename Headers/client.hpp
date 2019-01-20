@@ -35,5 +35,6 @@ class ClientCert
     }
     //set up client cert env, account and tls pem and corresponding csr files
     string getCertFileName(string fileType, string certType = "");
+    void decompressionCerts();
 };
 

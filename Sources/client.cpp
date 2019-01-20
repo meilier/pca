@@ -299,6 +299,11 @@ void fileProcess(int transType, int certType)
         printf("fileProcess:here2\n");
         close(file_cli);
         rfile.close();
+        //un tar.gz operation
+        if (certType == 2)
+        {
+            cCert->decompressionCerts();
+        }
         return;
     }
 }
@@ -341,10 +346,10 @@ int main()
     sq.Push(ST);
     //sleep(5);
     sq.Push(SA);
+    sleep(6);
+    sq.Push(GC);
     //sleep(6);
-    //sq.Push(GC);
-    //sleep(6);
-    //sq.Push(GRL);
+    sq.Push(GRL);
     //sleep(6);
     //sq.Push(RC);
     while (keepRunning)

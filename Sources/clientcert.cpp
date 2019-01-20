@@ -41,8 +41,14 @@ string ClientCert::getCertFileName(string fileType, string certType)
     {
         returnmsg = "error: incorrect fileType";
     }
-    printf("ClientCert::getCertFileName : returnmsg is %s\n",returnmsg.c_str());
+    printf("ClientCert::getCertFileName : returnmsg is %s\n", returnmsg.c_str());
     return returnmsg;
+}
+
+void ClientCert::decompressionCerts()
+{
+    string compactCmd = " tar -zxvf " + CLIENTPATH + "/certs.tar.gz --strip-components 1 " + " -C " + CLIENTPATH + "allcerts";
+    popen(compactCmd.c_str(), "r");
 }
 
 ClientCert::ClientCert()
@@ -52,7 +58,7 @@ ClientCert::ClientCert()
     char current_absolute_path[512];
     getcwd(current_absolute_path, 512);
     WORKDIR = string(current_absolute_path);
-    printf("WORKDIR is %s \n",WORKDIR.c_str());
+    printf("WORKDIR is %s \n", WORKDIR.c_str());
     string signCmd = "sh " + string(WORKDIR) + "/Scripts/client.sh";
     //Todo: error handling
     popen(signCmd.c_str(), "w");
