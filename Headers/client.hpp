@@ -38,3 +38,15 @@ class ClientCert
     void decompressionCerts();
 };
 
+void fileProcess(int transType, int certType);
+void receiveProcess();
+void handleProcess();
+void sendProcess();
+void sig_handler(int sig);
+void setup();
+void closesocket();
+void enqueueSA();
+void enqueueST();
+void enqueueGC();
+void enqueueRC();
+

@@ -23,11 +23,6 @@
 #define FILEPORT 7001
 #define BUFFER_SIZE 1024
 
-void fileProcess(int transType, int certType);
-void receiveProcess();
-void handleProcess();
-void sendProcess();
-void sig_handler(int sig);
 
 int sock_cli;
 fd_set rfds;
@@ -52,6 +47,19 @@ void sig_handler(int sig)
     {
         keepRunning = 0;
     }
+}
+
+void enqueueSA(){
+    sq.Push(SA);
+}
+void enqueueST(){
+    sq.Push(ST);
+}
+void enqueueGC(){
+    sq.Push(GC);
+}
+void enqueueRC(){
+    sq.Push(RC);
 }
 
 void receiveProcess()
@@ -308,7 +316,7 @@ void fileProcess(int transType, int certType)
     }
 }
 
-int main()
+void setup()
 {
     cCert = &cCert->getInstance();
     signal(SIGINT, sig_handler);
@@ -342,20 +350,25 @@ int main()
     t3.detach();
 
     //test Sign Account
-    sleep(6);
-    sq.Push(ST);
-    //sleep(5);
-    sq.Push(SA);
-    sleep(6);
-    sq.Push(GC);
     //sleep(6);
-    sq.Push(GRL);
+    //sq.Push(ST);
+    //sleep(5);
+    //sq.Push(SA);
+    //sleep(6);
+    //sq.Push(GC);
+    //sleep(6);
+    //sq.Push(GRL);
     //sleep(6);
     //sq.Push(RC);
-    while (keepRunning)
-    {
-        sleep(1);
-    }
+    // while (keepRunning)
+    // {
+    //     sleep(1);
+    // }
+    // close(sock_cli);
+    //return 0;
+}
+
+void closesocket()
+{
     close(sock_cli);
-    return 0;
 }
