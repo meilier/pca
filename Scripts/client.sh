@@ -8,8 +8,8 @@ mkdir -p $CLIENTPATH/requests/account $CLIENTPATH/requests/tls
 mkdir -p $CLIENTPATH/crl
 mkdir -p $CLIENTPATH/allcerts
 echo "set directory done"
-openssl genrsa -aes256 -passout pass:$CLIENTPASS -out $CLIENTPATH/certs/account/account.key.pem 2048
-# openssl ecparam -name secp384r1 -genkey | openssl ec -aes-256-cbc -passout pass:$CLIENTPASS -out $CLIENTPATH/certs/account/account.key.pem
+# openssl genrsa -aes256 -passout pass:$CLIENTPASS -out $CLIENTPATH/certs/account/account.key.pem 2048
+openssl ecparam -name secp384r1 -genkey | openssl ec -aes-256-cbc -passout pass:$CLIENTPASS -out $CLIENTPATH/certs/account/account.key.pem
 chmod 400 $CLIENTPATH/certs/account/account.key.pem
 openssl genrsa -aes256 -passout pass:$CLIENTPASS -out $CLIENTPATH/certs/tls/tls.key.pem 2048
 # openssl ecparam -name secp384r1 -genkey | openssl ec -aes-256-cbc -passout pass:$CLIENTPASS -out $CLIENTPATH/certs/tls/tls.key.pem
