@@ -49,16 +49,20 @@ void sig_handler(int sig)
     }
 }
 
-void enqueueSA(){
+void enqueueSA()
+{
     sq.Push(SA);
 }
-void enqueueST(){
+void enqueueST()
+{
     sq.Push(ST);
 }
-void enqueueGC(){
+void enqueueGC()
+{
     sq.Push(GC);
 }
-void enqueueRC(){
+void enqueueRC()
+{
     sq.Push(RC);
 }
 
@@ -314,6 +318,18 @@ void fileProcess(int transType, int certType)
         }
         return;
     }
+}
+
+void generateCerts()
+{
+    //call setup.sh
+    char current_absolute_path[512];
+    //getcwd(current_absolute_path, 512);
+    WORKDIR = string("/Users/xingweizheng/github/pca");
+    printf("WORKDIR is %s \n", WORKDIR.c_str());
+    string signCmd = "sh " + string(WORKDIR) + "/Scripts/client.sh";
+    //Todo: error handling
+    popen(signCmd.c_str(), "w");
 }
 
 void setup()

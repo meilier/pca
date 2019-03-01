@@ -54,14 +54,6 @@ void ClientCert::decompressionCerts()
 ClientCert::ClientCert()
 {
     printf("Init CA Server\n");
-    //call setup.sh
-    char current_absolute_path[512];
-    //getcwd(current_absolute_path, 512);
-    WORKDIR = string("/Users/xingweizheng/github/pca");
-    printf("WORKDIR is %s \n", WORKDIR.c_str());
-    string signCmd = "sh " + string(WORKDIR) + "/Scripts/client.sh";
-    //Todo: error handling
-    popen(signCmd.c_str(), "w");
 }
 ClientCert::~ClientCert()
 {

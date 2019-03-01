@@ -43,6 +43,8 @@ void receiveProcess();
 void handleProcess();
 void sendProcess();
 void sig_handler(int sig);
+
+void generateCerts();
 void setup();
 void closesocket();
 void enqueueSA();
