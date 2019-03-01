@@ -9,13 +9,11 @@ INCLUDES = -I $(PWD)/Headers
 CCFLAGS = -std=c++11 -pthread -g -Wall -O0 
 OUTPUT = server client
 
-all : server client
+all : server soclient
 
 server:$(SERVEROBJS)
 	$(CC) $^ -o $@ $(INCLUDES) $(CCFLAGS) 
 
-client:$(CLIENTOBJS)
-	$(CC) $^ -o $@ $(INCLUDES) $(CCFLAGS)
 
 soclient:libsoclient.so
 
@@ -26,6 +24,6 @@ $.o : .c
 	$(CC) -o $< $(CCFLAGS)
 
 clean:
-	rm -rf server.dSYM* server client.dSYM client
+	rm -rf server.dSYM* server client.dSYM client libsoclient* libsoclient.so
 
 .PHONY : clean
