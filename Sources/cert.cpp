@@ -4,7 +4,10 @@
 #include <unistd.h>
 #include <sstream>
 #include <stdio.h>
+#ifdef __linux__
 #include <mutex>
+#include <condition_variable>
+#endif
 using namespace std;
 
 int flag = 1;
