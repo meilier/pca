@@ -18,7 +18,7 @@ server:$(SERVEROBJS)
 soclient:libsoclient.so
 
 libsoclient.so:$(CLIENTOBJS)
-	$(CC) -shared $^ -o $@ $(INCLUDES) $(CCFLAGS)
+	$(CC) -shared $^ -o $@ $(INCLUDES) $(CCFLAGS) -fPIC
 
 $.o : .c
 	$(CC) -o $< $(CCFLAGS)
