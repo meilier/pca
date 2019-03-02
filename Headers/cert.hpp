@@ -10,7 +10,7 @@ private:
   int serial;
   map<int, int> CertSerial;
   //root path
-  const string CAPATH = "/Users/xingweizheng/testrsa/";
+  const string CAPATH = "/testrsa/";
   const string caCert = CAPATH;
   //first-tier path
   const string nodeCert = CAPATH + "certs/";
