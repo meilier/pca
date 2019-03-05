@@ -45,6 +45,7 @@ public:
   void signCert(int conn,string certType);
   void getAllCerts();
   void revokeCert(int conn);
+  void getCertOrgName(int conn);
 
   string getCertFileName(int conn, string fileType, string useType = "");
 };

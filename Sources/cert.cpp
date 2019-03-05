@@ -135,6 +135,29 @@ string Cert::getCertFileName(int conn, string fileType, string useType)
     return returnmsg;
 }
 
+void Cert::getCertOrgName(int conn)
+{
+    //according to conn's csr serial numner to get its orgname
+    FILE *fp;
+    char buf[1024];
+    //call setup.sh
+    string signCmd = " openssl req -in /Users/xingweizheng/testrsa/requests/account/accountCert" + to_string(CertSerial.find(conn)->second) + ".csr -noout -text |grep ST| awk  '{print $6}'|awk -F= '{print $2}'";
+    //Todo: error handling
+    printf("hello world\n");
+    if ((fp = popen(signCmd.c_str(), "w")) == NULL)
+    {
+        printf("failed to popen");
+    }else{
+        printf("It's OK!\n");
+    }
+    fp == NULL ? printf("yes\n"):printf("no\n");
+    while (fgets(buf, 200, fp) != NULL)
+    {
+        printf("%s\n", buf);
+    }
+    pclose(fp);
+}
+
 void Cert::increaseSerial()
 {
     serial++;
